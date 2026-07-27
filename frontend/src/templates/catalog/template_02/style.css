@@ -1,0 +1,92 @@
+/* style.css — template_02 (Vedic Sage). Visual skin only. */
+
+.bd-template02 {
+  position: relative;
+  width: 735px;
+  min-height: 1040px;
+  margin: 0 auto;
+  padding: 40px 56px 56px 76px;
+  background: #eef6f0;
+  border-left: 18px solid #2f7a44;
+  box-sizing: border-box;
+  font-family: "Georgia", "Times New Roman", serif;
+  color: #1f2d24;
+}
+
+.bd-template02 .bd02-invocation {
+  text-align: center;
+  color: #2f7a44;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+.bd-template02 .bd02-title {
+  text-align: center;
+  color: #1f6b33;
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.bd-template02 .bd02-title-rule {
+  height: 2px;
+  background: #2f7a44;
+  margin: 0 0 26px;
+  opacity: 0.6;
+}
+
+.bd-template02 .bd02-photo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+.bd-template02 .bd02-photo {
+  width: 150px;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #2f7a44;
+}
+.bd-template02 .bd02-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a8f7f;
+  font-size: 13px;
+  background: #dfeee2;
+}
+
+.bd-template02 .bd02-section-title {
+  background: #dcece0;
+  border-left: 4px solid #2f7a44;
+  padding: 8px 14px;
+  margin: 26px 0 10px;
+}
+.bd-template02 .bd02-section-title span {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f6b33;
+  letter-spacing: 0.02em;
+}
+
+.bd-template02 .bd02-section {
+  display: flex;
+  flex-direction: column;
+}
+.bd-template02 .bd02-row {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  padding: 9px 4px;
+  border-bottom: 1px solid #cfe2d3;
+  font-size: 15px;
+}
+.bd-template02 .bd02-label {
+  font-weight: 700;
+  color: #1f2d24;
+}
+.bd-template02 .bd02-value {
+  color: #1f2d24;
+}
+
+@media print {
+  .bd-template02 { box-shadow: none; }
+}

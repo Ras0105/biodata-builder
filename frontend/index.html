@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biodata Builder</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">Biodata Builder</div>
+  </header>
+
+  <main class="container">
+
+    <section id="view-gallery">
+      <h1 style="margin-top:0;">Choose a template</h1>
+      <p style="color:#666; margin-bottom:24px;">Pick a style, fill in your details, preview live, then download.</p>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </section>
+
+    <section id="view-builder" hidden>
+      <div class="top-actions">
+        <button type="button" id="backBtn" class="btn btn-secondary">&larr; Back to templates</button>
+      </div>
+
+      <div class="builder-layout">
+        <div class="form-panel">
+          <fieldset class="form-section">
+            <legend>Contact (for delivery)</legend>
+            <div class="contact-row">
+              <div class="form-field">
+                <label for="f_fullName">Full Name *</label>
+                <input id="f_fullName" type="text" />
+              </div>
+              <div class="form-field">
+                <label for="f_email">Email *</label>
+                <input id="f_email" type="email" />
+              </div>
+            </div>
+          </fieldset>
+          <div id="formMount"></div>
+        </div>
+
+        <div class="preview-panel">
+          <div class="preview-scale">
+            <div id="previewMount"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-bar">
+        <button type="button" id="downloadBtn" class="btn">Print / Download</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div id="overlayText">Working…</div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
