@@ -1,55 +1,60 @@
-// schema.js — template_05 (Heritage Wood)
-// Independent of every other template. Reference groups Religion, Community
-// and Family Lineage directly into Personal Details (no separate religious
-// section), and Family Details includes Maternal Uncle + Relatives, which
-// no other template so far has.
+// schema.js — template_11 (Marathi Kuldaivat)
+// Independent of every other template. First Marathi-language template in
+// the catalog — labels themselves are in Devanagari script (मराठी), matching
+// the reference format. Includes Maharashtrian-specific astrological fields
+// (Kuldaivat, Nadi, Gan, Varna) that no other template in this catalog has.
 
 export const schema = {
-  id: "template_05",
+  id: "template_11",
   photo: {
     id: "photo",
-    label: "Photo",
+    label: "फोटो",
     shape: "rect",
     required: true,
   },
   sections: [
     {
       id: "personal",
-      title: "Personal Details",
+      title: "वैयक्तिक माहिती",
       fields: [
-        { id: "fullName", label: "Full Name", type: "text", required: true },
-        { id: "dob", label: "Date of Birth", type: "date", required: true },
-        { id: "height", label: "Height", type: "text" },
-        { id: "placeOfBirth", label: "Place of Birth", type: "text" },
-        { id: "religion", label: "Religion", type: "text" },
-        { id: "community", label: "Community", type: "text", placeholder: "e.g. Sunni" },
-        { id: "familyLineage", label: "Family Lineage", type: "text" },
-        { id: "complexion", label: "Complexion", type: "text" },
-        { id: "bloodGroup", label: "Blood Group", type: "text" },
-        { id: "highestEducation", label: "Highest Education", type: "text" },
-        { id: "occupation", label: "Occupation", type: "text" },
+        { id: "naav", label: "नाव", type: "text", required: true },
+        { id: "janmaTarikh", label: "जन्म तारीख", type: "date", required: true },
+        { id: "janmaVel", label: "जन्म वेळ", type: "text" },
+        { id: "janmaThikaan", label: "जन्म ठिकाण", type: "text" },
+        { id: "dharmaJaat", label: "धर्म/जात", type: "text" },
+        { id: "kuldaivat", label: "कुलदैवत", type: "text" },
+        { id: "gotra", label: "गोत्र", type: "text" },
+        { id: "nakshatra", label: "नक्षत्र", type: "text" },
+        { id: "rashi", label: "राशी", type: "text" },
+        { id: "naadi", label: "नाडी", type: "text" },
+        { id: "gan", label: "गण", type: "text" },
+        { id: "varna", label: "वर्ण", type: "text" },
+        { id: "unchi", label: "उंची", type: "text" },
+        { id: "raktagat", label: "रक्तगट", type: "text" },
+        { id: "shikshan", label: "शिक्षण", type: "text" },
+        { id: "naukri", label: "नोकरी", type: "text" },
+        { id: "vetan", label: "वेतन", type: "text" },
       ],
     },
     {
       id: "family",
-      title: "Family Details",
+      title: "कौटुंबिक माहिती",
       fields: [
-        { id: "fatherName", label: "Father's Name", type: "text" },
-        { id: "fatherOccupation", label: "Father's Occupation", type: "text" },
-        { id: "motherName", label: "Mother's Name", type: "text" },
-        { id: "motherOccupation", label: "Mother's Occupation", type: "text" },
-        { id: "brothers", label: "Brothers", type: "text" },
-        { id: "sisters", label: "Sisters", type: "text" },
-        { id: "maternalUncle", label: "Maternal Uncle", type: "text" },
-        { id: "relatives", label: "Relatives", type: "text" },
+        { id: "vadilancheNaav", label: "वडिलांचे नाव", type: "text" },
+        { id: "vadilanchaVyavasay", label: "वडिलांचा व्यवसाय", type: "text" },
+        { id: "aaicheNaav", label: "आईचे नाव", type: "text" },
+        { id: "bhau", label: "भाऊ", type: "text" },
+        { id: "bahin", label: "बहीण", type: "text" },
+        { id: "mama", label: "मामा", type: "text" },
+        { id: "nateSambandh", label: "नातेसंबंध", type: "text" },
       ],
     },
     {
       id: "contact",
-      title: "Contact Details",
+      title: "संपर्क",
       fields: [
-        { id: "mobileNumber", label: "Mobile Number", type: "text", required: true },
-        { id: "address", label: "Address", type: "text" },
+        { id: "mobile", label: "मोबाईल नंबर", type: "text", required: true },
+        { id: "patta", label: "पत्ता", type: "text" },
       ],
     },
   ],

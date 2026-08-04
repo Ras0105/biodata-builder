@@ -1,55 +1,73 @@
-// schema.js — template_05 (Heritage Wood)
-// Independent of every other template. Reference groups Religion, Community
-// and Family Lineage directly into Personal Details (no separate religious
-// section), and Family Details includes Maternal Uncle + Relatives, which
-// no other template so far has.
+// schema.js — template_10 (Modern Narrative)
+// Independent of every other template. Structurally different from every
+// other template in the catalog: instead of one long list of label:value
+// rows, this one is built around short card sections plus two free-text
+// narrative fields (About Myself, Expectations) — matching the
+// "personality-led" biodata style seen in modern matrimonial sites, as
+// opposed to the pure-facts style of templates 01-09.
 
 export const schema = {
-  id: "template_05",
+  id: "template_10",
   photo: {
     id: "photo",
     label: "Photo",
-    shape: "rect",
+    shape: "circle",
     required: true,
   },
   sections: [
     {
-      id: "personal",
-      title: "Personal Details",
+      id: "profile",
+      title: "Profile",
       fields: [
         { id: "fullName", label: "Full Name", type: "text", required: true },
         { id: "dob", label: "Date of Birth", type: "date", required: true },
-        { id: "height", label: "Height", type: "text" },
-        { id: "placeOfBirth", label: "Place of Birth", type: "text" },
+        { id: "location", label: "Location", type: "text" },
+        { id: "motherTongue", label: "Mother Tongue", type: "text" },
+        { id: "email", label: "Email", type: "text" },
+        { id: "phone", label: "Phone", type: "text", required: true },
+      ],
+    },
+    {
+      id: "overview",
+      title: "Overview",
+      fields: [
         { id: "religion", label: "Religion", type: "text" },
-        { id: "community", label: "Community", type: "text", placeholder: "e.g. Sunni" },
-        { id: "familyLineage", label: "Family Lineage", type: "text" },
-        { id: "complexion", label: "Complexion", type: "text" },
-        { id: "bloodGroup", label: "Blood Group", type: "text" },
-        { id: "highestEducation", label: "Highest Education", type: "text" },
         { id: "occupation", label: "Occupation", type: "text" },
+        { id: "education", label: "Education", type: "text" },
+        { id: "diet", label: "Diet", type: "text" },
+        { id: "hobbies", label: "Hobbies", type: "text" },
+      ],
+    },
+    {
+      id: "aboutMe",
+      title: "About Myself",
+      fields: [
+        { id: "aboutMe", label: "About Myself", type: "textarea" },
+      ],
+    },
+    {
+      id: "expectations",
+      title: "Expectations",
+      fields: [
+        { id: "expectations", label: "Expectations", type: "textarea" },
       ],
     },
     {
       id: "family",
-      title: "Family Details",
+      title: "Family",
       fields: [
-        { id: "fatherName", label: "Father's Name", type: "text" },
-        { id: "fatherOccupation", label: "Father's Occupation", type: "text" },
-        { id: "motherName", label: "Mother's Name", type: "text" },
-        { id: "motherOccupation", label: "Mother's Occupation", type: "text" },
-        { id: "brothers", label: "Brothers", type: "text" },
-        { id: "sisters", label: "Sisters", type: "text" },
-        { id: "maternalUncle", label: "Maternal Uncle", type: "text" },
-        { id: "relatives", label: "Relatives", type: "text" },
+        { id: "fatherName", label: "Father", type: "text" },
+        { id: "motherName", label: "Mother", type: "text" },
+        { id: "siblings", label: "Siblings", type: "text" },
       ],
     },
     {
-      id: "contact",
-      title: "Contact Details",
+      id: "beliefs",
+      title: "Beliefs",
       fields: [
-        { id: "mobileNumber", label: "Mobile Number", type: "text", required: true },
-        { id: "address", label: "Address", type: "text" },
+        { id: "gotra", label: "Gotra", type: "text" },
+        { id: "rashi", label: "Rashi", type: "text" },
+        { id: "mangalik", label: "Mangalik", type: "text" },
       ],
     },
   ],

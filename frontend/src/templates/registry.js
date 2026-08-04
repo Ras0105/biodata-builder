@@ -84,10 +84,46 @@ export const TEMPLATE_REGISTRY = [
     loadLayout: () => import("./catalog/template_08/layout.js"),
     styleHref: "./src/templates/catalog/template_08/style.css",
   },
-  // template_09, template_10, template_11 intentionally NOT registered yet —
-  // their schema.js/layout.js/style.css are currently byte-for-byte copies
-  // of template_05 (even schema.id still says "template_05" internally).
-  // Fix those files first, then add entries here following the pattern above.
+  {
+    id: "template_09",
+    name: "Sikh Sacred Gold",
+    community: "Sikh",
+    description: "Gold & navy theme with the Ik Onkar symbol and Waheguru invocation — first Sikh-community template in the catalog.",
+    thumbnail: "./src/assets/thumbnails/template_09.png",
+    loadSchema: () => import("./catalog/template_09/schema.js"),
+    loadLayout: () => import("./catalog/template_09/layout.js"),
+    styleHref: "./src/templates/catalog/template_09/style.css",
+  },
+  {
+    id: "template_10",
+    name: "Modern Narrative",
+    community: "Hindu",
+    description: "Dark card-grid layout built around free-text About Myself / Expectations sections alongside Overview, Family and Beliefs — structurally distinct from the row-based templates.",
+    thumbnail: "./src/assets/thumbnails/template_10.png",
+    loadSchema: () => import("./catalog/template_10/schema.js"),
+    loadLayout: () => import("./catalog/template_10/layout.js"),
+    styleHref: "./src/templates/catalog/template_10/style.css",
+  },
+  {
+    id: "template_11",
+    name: "Marathi Kuldaivat",
+    community: "Hindu",
+    description: "First Marathi-language template — Devanagari labels with Maharashtrian astrological fields (Kuldaivat, Nadi, Gan, Varna) not found in any other template.",
+    thumbnail: "./src/assets/thumbnails/template_11.png",
+    loadSchema: () => import("./catalog/template_11/schema.js"),
+    loadLayout: () => import("./catalog/template_11/layout.js"),
+    styleHref: "./src/templates/catalog/template_11/style.css",
+  },
+  {
+    id: "template_12",
+    name: "Extended Family Tree",
+    community: "Hindu",
+    description: "Two-column layout built for dense, multi-generation family sections — Paternal Uncle/Aunt and separate Paternal/Maternal Grandparents fields, unique to this template.",
+    thumbnail: "./src/assets/thumbnails/template_12.png",
+    loadSchema: () => import("./catalog/template_12/schema.js"),
+    loadLayout: () => import("./catalog/template_12/layout.js"),
+    styleHref: "./src/templates/catalog/template_12/style.css",
+  },
 ];
 
 export function getTemplateMeta(id) {

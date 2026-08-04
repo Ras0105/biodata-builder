@@ -1,91 +1,79 @@
-/* style.css — template_05 (Heritage Wood). Visual skin only. */
+/* style.css — template_09 (Sikh Sacred Gold). Visual skin only. */
 
-.bd-template05 {
+.bd-template09 {
   position: relative;
   width: 735px;
   min-height: 1040px;
   margin: 0 auto;
-  padding: 40px 56px 56px;
-  background: #ece4d4;
-  border: 8px solid #a8461f;
+  padding: 46px 56px;
+  background: #fdfaf2;
+  border: 6px solid #b3852c;
   box-sizing: border-box;
   font-family: "Georgia", "Times New Roman", serif;
-  color: #3a2e22;
+  color: #2e2a1f;
 }
 
-.bd-template05 .bd05-corner {
-  position: absolute;
-  width: 70px;
-  height: 70px;
-  border-color: #a8461f;
-  opacity: 0.85;
+.bd-template09 .bd09-emblem {
+  text-align: center;
+  color: #b3852c;
+  font-size: 40px;
+  margin-bottom: 6px;
 }
-.bd-template05 .bd05-corner-tl { top: 10px; left: 10px; border-top: 3px solid; border-left: 3px solid; border-radius: 12px 0 0 0; }
-.bd-template05 .bd05-corner-tr { top: 10px; right: 10px; border-top: 3px solid; border-right: 3px solid; border-radius: 0 12px 0 0; }
-.bd-template05 .bd05-corner-bl { bottom: 10px; left: 10px; border-bottom: 3px solid; border-left: 3px solid; border-radius: 0 0 0 12px; }
-.bd-template05 .bd05-corner-br { bottom: 10px; right: 10px; border-bottom: 3px solid; border-right: 3px solid; border-radius: 0 0 12px 0; }
-
-.bd-template05 .bd05-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.bd-template05 .bd05-title {
-  font-size: 26px;
+.bd-template09 .bd09-invocation {
+  text-align: center;
+  color: #16305c;
+  font-size: 15px;
   font-weight: 700;
-  color: #a8461f;
-}
-.bd-template05 .bd05-title-arabic {
-  font-size: 20px;
-  color: #2f7a44;
-  direction: rtl;
+  letter-spacing: 0.02em;
+  margin-bottom: 28px;
 }
 
-.bd-template05 .bd05-top-row {
+.bd-template09 .bd09-top-row {
   display: grid;
   grid-template-columns: 1fr 150px;
   gap: 20px;
   align-items: start;
 }
-.bd-template05 .bd05-photo-wrap { display: flex; justify-content: center; align-items: flex-start; }
-.bd-template05 .bd05-photo {
+.bd-template09 .bd09-photo-wrap { display: flex; justify-content: center; align-items: flex-start; }
+.bd-template09 .bd09-photo {
   width: 140px;
-  height: 140px;
+  height: 170px;
   object-fit: cover;
-  border: 2px solid #a8461f;
+  border: 2px solid #b3852c;
+  border-radius: 4px;
 }
-.bd-template05 .bd05-photo-placeholder {
+.bd-template09 .bd09-photo-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #8a7862;
+  color: #a3906a;
   font-size: 13px;
-  background: #dcd2bd;
+  background: rgba(179, 133, 44, 0.1);
 }
 
-.bd-template05 .bd05-section-title {
-  color: #a8461f;
+.bd-template09 .bd09-section-title {
+  color: #16305c;
   font-size: 19px;
   font-weight: 700;
-  margin: 24px 0 10px;
+  margin: 26px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #b3852c;
 }
 
-.bd-template05 .bd05-section {
+.bd-template09 .bd09-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.bd-template05 .bd05-row {
+.bd-template09 .bd09-row {
   display: grid;
   grid-template-columns: 170px 14px 1fr;
   font-size: 15px;
   line-height: 1.4;
 }
-.bd-template05 .bd05-label { font-weight: 700; }
-.bd-template05 .bd05-value { color: #3a2e22; }
+.bd-template09 .bd09-label { font-weight: 700; color: #16305c; }
+.bd-template09 .bd09-value { color: #2e2a1f; }
 
 @media print {
-  .bd-template05 { box-shadow: none; }
+  .bd-template09 { box-shadow: none; }
 }
