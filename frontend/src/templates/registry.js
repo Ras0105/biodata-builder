@@ -124,6 +124,36 @@ export const TEMPLATE_REGISTRY = [
     loadLayout: () => import("./catalog/template_12/layout.js"),
     styleHref: "./src/templates/catalog/template_12/style.css",
   },
+  {
+    id: "template_13",
+    name: "Chattogram Ornate",
+    community: "Muslim",
+    description: "Two-column teal & gold ornate frame with Nationality and Expectations fields, and siblings captured as free-form prose rather than row-per-relative.",
+    thumbnail: "./src/assets/thumbnails/template_13.png",
+    loadSchema: () => import("./catalog/template_13/schema.js"),
+    loadLayout: () => import("./catalog/template_13/layout.js"),
+    styleHref: "./src/templates/catalog/template_13/style.css",
+  },
+  {
+    id: "template_14",
+    name: "Sanskrit Vivaha Vrittapatram",
+    community: "Hindu",
+    description: "Clean single-column Sanskrit-language template with a Ganesh invocation header — deliberately minimal, distinct from template_11's ornate Marathi look.",
+    thumbnail: "./src/assets/thumbnails/template_14.png",
+    loadSchema: () => import("./catalog/template_14/schema.js"),
+    loadLayout: () => import("./catalog/template_14/layout.js"),
+    styleHref: "./src/templates/catalog/template_14/style.css",
+  },
+  {
+    id: "template_15",
+    name: "Noor Mahal Beliefs",
+    community: "Muslim",
+    description: "Modern ivory & gold card-grid biodata with a dedicated Beliefs section — Namaz frequency, Hijab-after-marriage stance and Caste preference — matching contemporary matrimonial-site formats.",
+    thumbnail: "./src/assets/thumbnails/template_15.png",
+    loadSchema: () => import("./catalog/template_15/schema.js"),
+    loadLayout: () => import("./catalog/template_15/layout.js"),
+    styleHref: "./src/templates/catalog/template_15/style.css",
+  },
 ];
 
 export function getTemplateMeta(id) {
