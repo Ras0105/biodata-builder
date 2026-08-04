@@ -77,12 +77,15 @@ body {
 .form-section legend { font-weight: 700; font-size: 14px; margin-bottom: 10px; padding: 0; }
 .form-field { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
 .form-field label { font-size: 13px; color: #444; }
-.form-field input {
+.form-field input,
+.form-field textarea {
   padding: 8px 10px;
   border: 1px solid #d5d2ca;
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
 }
+.form-field textarea { resize: vertical; min-height: 80px; }
 .preview-panel { display: flex; justify-content: center; }
 .preview-scale { transform: scale(0.72); transform-origin: top center; }
 

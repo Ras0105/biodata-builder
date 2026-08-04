@@ -1,6 +1,6 @@
 import { getTemplateMeta } from "./templates/registry.js";
 import { renderGallery } from "./components/templateGallery.js";
-import { renderForm } from "./components/formRenderer.js";
+import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
 import { state, setField, selectTemplate, backToGallery, subscribe } from "./state.js";
@@ -60,6 +60,12 @@ backBtn.addEventListener("click", () => {
 subscribe(() => {});
 
 downloadBtn.addEventListener("click", () => {
+  const missing = getMissingRequiredFields(state.schema, state.formData);
+  if (missing.length) {
+    overlay.fail(`Please fill in: ${missing.join(", ")}`);
+    return;
+  }
+
   startCheckout(
     {
       email: state.email,
