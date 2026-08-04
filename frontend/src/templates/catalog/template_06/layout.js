@@ -1,85 +1,65 @@
-/* style.css — template_06 (Blossom Pink). Visual skin only. */
+// layout.js — template_06 (Blossom Pink)
+// Pure rendering: (formData) -> HTML string for the live preview / print sheet.
+// Knows nothing about other templates. Styling comes entirely from style.css.
 
-.bd-template06 {
-  position: relative;
-  width: 735px;
-  min-height: 1040px;
-  margin: 0 auto;
-  padding: 44px 56px;
-  background: #fbe4ea;
-  border: 10px double #c9954f;
-  box-sizing: border-box;
-  font-family: "Georgia", "Times New Roman", serif;
-  color: #4a3b3f;
+import { schema } from "./schema.js";
+
+function esc(str) {
+  return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-.bd-template06 .bd06-icon {
-  text-align: center;
-  color: #c9954f;
-  font-size: 34px;
-  margin-bottom: 6px;
-}
-.bd-template06 .bd06-invocation {
-  text-align: center;
-  color: #a8703f;
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  margin-bottom: 26px;
+function row(label, value) {
+  return `
+    <div class="bd06-row">
+      <span class="bd06-label">${esc(label)}</span>
+      <span class="bd06-value">${value && value.trim() ? esc(value) : "&nbsp;"}</span>
+    </div>`;
 }
 
-.bd-template06 .bd06-top-row {
-  display: grid;
-  grid-template-columns: 1fr 150px;
-  gap: 20px;
-  align-items: start;
-}
-.bd-template06 .bd06-photo-wrap { display: flex; justify-content: center; align-items: flex-start; }
-.bd-template06 .bd06-photo {
-  width: 140px;
-  height: 175px;
-  object-fit: cover;
-  border: 2px solid #c9954f;
-  border-radius: 3px;
-}
-.bd-template06 .bd06-photo-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #b98fa0;
-  font-size: 13px;
-  background: rgba(201, 149, 79, 0.12);
+function sectionTitle(title) {
+  return `<h2 class="bd06-section-title">${esc(title)}</h2>`;
 }
 
-.bd-template06 .bd06-section-title {
-  color: #a8703f;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  margin: 26px 0 12px;
-  letter-spacing: 0.02em;
-}
+export function render(formData) {
+  const [personal, religious, family, contact] = schema.sections;
+  const photoSrc = formData.photo || "";
 
-.bd-template06 .bd06-section-single {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.bd-template06 .bd06-section-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 18px;
-}
+  return `
+    <div class="bd-template bd-template06">
+      <div class="bd06-icon">&#9789;</div>
+      <div class="bd06-invocation">Bismillah-ir-Rahman-ir-Rahim</div>
 
-.bd-template06 .bd06-row {
-  display: grid;
-  grid-template-columns: 150px 1fr;
-  font-size: 14.5px;
-  line-height: 1.4;
-}
-.bd-template06 .bd06-label { color: #a8703f; font-weight: 700; }
-.bd-template06 .bd06-value { color: #4a3b3f; }
+      <div class="bd06-top-row">
+        <div class="bd06-top-left">
+          ${sectionTitle(personal.title)}
+          <div class="bd06-section-single">
+            ${personal.fields.slice(0, 8).map((f) => row(f.label, formData[f.id])).join("")}
+          </div>
+        </div>
+        <div class="bd06-photo-wrap">
+          ${photoSrc
+            ? `<img class="bd06-photo" src="${photoSrc}" alt="Photo" />`
+            : `<div class="bd06-photo bd06-photo-placeholder">Photo</div>`}
+        </div>
+      </div>
 
-@media print {
-  .bd-template06 { box-shadow: none; }
+      <div class="bd06-section-single">
+        ${personal.fields.slice(8).map((f) => row(f.label, formData[f.id])).join("")}
+      </div>
+
+      ${sectionTitle(religious.title)}
+      <div class="bd06-section-pair">
+        ${religious.fields.map((f) => row(f.label, formData[f.id])).join("")}
+      </div>
+
+      ${sectionTitle(family.title)}
+      <div class="bd06-section-pair">
+        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+      </div>
+
+      ${sectionTitle(contact.title)}
+      <div class="bd06-section-pair">
+        ${contact.fields.map((f) => row(f.label, formData[f.id])).join("")}
+      </div>
+    </div>`;
 }

@@ -54,6 +54,40 @@ export const TEMPLATE_REGISTRY = [
     loadLayout: () => import("./catalog/template_05/layout.js"),
     styleHref: "./src/templates/catalog/template_05/style.css",
   },
+  {
+    id: "template_06",
+    name: "Blossom Pink",
+    community: "Muslim",
+    description: "Soft pink theme with a dedicated Birth Name field alongside legal Full Name and a Sect / Maslak section.",
+    thumbnail: "./src/assets/thumbnails/template_06.png",
+    loadSchema: () => import("./catalog/template_06/schema.js"),
+    loadLayout: () => import("./catalog/template_06/layout.js"),
+    styleHref: "./src/templates/catalog/template_06/style.css",
+  },
+  {
+    id: "template_07",
+    name: "Sacred Minimal",
+    community: "Christian",
+    description: "Deliberately spare black & white layout (no religious-details section, unlike template_08) with a Work field distinct from Occupation.",
+    thumbnail: "./src/assets/thumbnails/template_07.png",
+    loadSchema: () => import("./catalog/template_07/schema.js"),
+    loadLayout: () => import("./catalog/template_07/layout.js"),
+    styleHref: "./src/templates/catalog/template_07/style.css",
+  },
+  {
+    id: "template_08",
+    name: "Sky Blue Faith",
+    community: "Christian",
+    description: "Sky-blue theme with the most detailed religious section yet — Church, Denomination, Diocese, Parish, Confirmation, Sacraments and Baptism Date.",
+    thumbnail: "./src/assets/thumbnails/template_08.png",
+    loadSchema: () => import("./catalog/template_08/schema.js"),
+    loadLayout: () => import("./catalog/template_08/layout.js"),
+    styleHref: "./src/templates/catalog/template_08/style.css",
+  },
+  // template_09, template_10, template_11 intentionally NOT registered yet —
+  // their schema.js/layout.js/style.css are currently byte-for-byte copies
+  // of template_05 (even schema.id still says "template_05" internally).
+  // Fix those files first, then add entries here following the pattern above.
 ];
 
 export function getTemplateMeta(id) {
