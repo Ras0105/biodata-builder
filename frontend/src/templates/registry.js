@@ -24,6 +24,36 @@ export const TEMPLATE_REGISTRY = [
     loadLayout: () => import("./catalog/template_02/layout.js"),
     styleHref: "./src/templates/catalog/template_02/style.css",
   },
+  {
+    id: "template_03",
+    name: "Royal Maroon",
+    community: "Hindu",
+    description: "Ornate maroon & gold design with a diamond-pattern border, geared toward bride biodata.",
+    thumbnail: "./src/assets/thumbnails/template_03.png",
+    loadSchema: () => import("./catalog/template_03/schema.js"),
+    loadLayout: () => import("./catalog/template_03/layout.js"),
+    styleHref: "./src/templates/catalog/template_03/style.css",
+  },
+  {
+    id: "template_04",
+    name: "Navy & Gold",
+    community: "Muslim",
+    description: "Elegant navy background with gold typography, including a dedicated Sect / Maslak section.",
+    thumbnail: "./src/assets/thumbnails/template_04.png",
+    loadSchema: () => import("./catalog/template_04/schema.js"),
+    loadLayout: () => import("./catalog/template_04/layout.js"),
+    styleHref: "./src/templates/catalog/template_04/style.css",
+  },
+  {
+    id: "template_05",
+    name: "Heritage Wood",
+    community: "Muslim",
+    description: "Warm earthy wood-texture background with rust corner borders and Arabic-script accent.",
+    thumbnail: "./src/assets/thumbnails/template_05.png",
+    loadSchema: () => import("./catalog/template_05/schema.js"),
+    loadLayout: () => import("./catalog/template_05/layout.js"),
+    styleHref: "./src/templates/catalog/template_05/style.css",
+  },
 ];
 
 export function getTemplateMeta(id) {

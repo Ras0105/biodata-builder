@@ -1,4 +1,4 @@
-/* style.css — template_01 (Classic Ivory)
+/* style.css — template_01 (Hindu Classic Ivory)
    Visual skin ONLY. No layout logic lives here beyond CSS positioning. */
 
 .bd-template01 {
@@ -14,6 +14,7 @@
   color: #2b2b2b;
 }
 
+/* corner floral flourishes, drawn in pure CSS/SVG so no image assets needed */
 .bd-template01 .bd-corner {
   position: absolute;
   width: 110px;
@@ -82,6 +83,7 @@
   font-weight: 400;
 }
 
+/* print sheet should not show screen-only chrome (handled by app shell, not here) */
 @media print {
   .bd-template01 {
     border-color: #2b2b2b;

@@ -1,4 +1,4 @@
-// layout.js — template_01 (Classic Ivory)
+// layout.js — template_01 (Hindu Classic Ivory)
 // Pure rendering: (formData) -> HTML string for the live preview / print sheet.
 // Knows nothing about other templates. Styling comes entirely from style.css.
 

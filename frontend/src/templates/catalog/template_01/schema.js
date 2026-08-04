@@ -1,4 +1,4 @@
-// schema.js — template_01 (Classic Ivory)
+// schema.js — template_01 (Hindu Classic Ivory)
 // Defines exactly the fields this template needs, nothing shared with other templates.
 
 export const schema = {
