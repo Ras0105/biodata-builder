@@ -3,7 +3,7 @@ import { renderGallery } from "./components/templateGallery.js";
 import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
-import { state, setField, selectTemplate, backToGallery, subscribe } from "./state.js";
+import { state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft } from "./state.js";
 
 const viewGallery = document.getElementById("view-gallery");
 const viewBuilder = document.getElementById("view-builder");
@@ -28,15 +28,17 @@ function showView() {
   viewBuilder.hidden = state.view !== "builder";
 }
 
-async function onSelectTemplate(templateId) {
+async function onSelectTemplate(templateId, { updateHash = true } = {}) {
   const meta = getTemplateMeta(templateId);
   const { schema } = await meta.loadSchema();
   selectTemplate(templateId, schema);
   showView();
 
-  // Form is built ONCE per template selection. Each keystroke updates state
-  // and repaints only the preview — rebuilding the form on every keystroke
-  // would blow away input focus.
+  fullNameInput.value = state.fullName;
+  emailInput.value = state.email;
+
+  if (updateHash) location.hash = `#/${templateId}`;
+
   renderForm(formMount, state.schema, state.formData, (fieldId, value) => {
     setField(fieldId, value);
     renderPreview(previewMount, state.templateId, state.formData);
@@ -45,18 +47,15 @@ async function onSelectTemplate(templateId) {
   await renderPreview(previewMount, state.templateId, state.formData);
 }
 
-fullNameInput.addEventListener("input", (e) => { state.fullName = e.target.value; });
-emailInput.addEventListener("input", (e) => { state.email = e.target.value; });
+fullNameInput.addEventListener("input", (e) => { state.fullName = e.target.value; saveDraft(); });
+emailInput.addEventListener("input", (e) => { state.email = e.target.value; saveDraft(); });
 
 backBtn.addEventListener("click", () => {
   backToGallery();
   showView();
+  history.pushState(null, "", location.pathname);
 });
 
-// state.notify() still fires on setField (e.g. if other UI ever needs to react
-// to form data changes generically); the form/preview repaint above already
-// happens directly from the input handler, so this subscription is a no-op
-// placeholder kept for future generic listeners.
 subscribe(() => {});
 
 downloadBtn.addEventListener("click", () => {
@@ -76,7 +75,26 @@ downloadBtn.addEventListener("click", () => {
     },
     overlay
   );
+  // Optional: clearDraft(state.templateId) after a *confirmed* successful order,
+  // inside checkout.js's success callback — not here, in case payment fails.
 });
 
-renderGallery(galleryGrid, onSelectTemplate);
-showView();
+// --- hash routing: deep link + refresh survival ---
+function routeFromHash() {
+  const match = location.hash.match(/^#\/(.+)$/);
+  if (match) {
+    try {
+      onSelectTemplate(match[1], { updateHash: false });
+      return;
+    } catch {
+      // unknown template id in hash — fall through to gallery
+    }
+  }
+  backToGallery();
+  showView();
+}
+
+window.addEventListener("hashchange", routeFromHash);
+
+renderGallery(galleryGrid, (id) => onSelectTemplate(id));
+routeFromHash(); // handles initial load, including a refresh mid-builder

@@ -87,7 +87,7 @@ body {
 }
 .form-field textarea { resize: vertical; min-height: 80px; }
 .preview-panel { display: flex; justify-content: center; }
-.preview-scale { transform: scale(0.72); transform-origin: top center; }
+.preview-scale { transform-origin: top center; }
 
 .btn {
   padding: 10px 18px;
@@ -111,3 +111,45 @@ body {
 .overlay[hidden] { display: none; }
 
 .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+
+/* ---- Responsive builder layout ---- */
+@media (max-width: 960px) {
+  .container { padding: 16px; }
+
+  .builder-layout {
+    grid-template-columns: 1fr; /* stack form above preview */
+    gap: 20px;
+  }
+
+  .form-panel {
+    max-height: none; /* no forced inner scroll on mobile */
+    overflow-y: visible;
+    padding: 16px;
+  }
+
+  .preview-panel {
+    order: 2; /* form first, preview below on mobile */
+  }
+
+  .preview-scale {
+    transform: none; /* let JS-driven width scaling take over, see main.js */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .contact-row {
+    grid-template-columns: 1fr; /* stack full name / email */
+  }
+
+  .top-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+  .checkout-bar { justify-content: stretch; }
+  .checkout-bar .btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .app-header { padding: 14px 16px; }
+  .app-header .brand { font-size: 17px; }
+  .form-field input, .form-field textarea { font-size: 16px; } /* prevents iOS auto-zoom on focus */
+}
+
