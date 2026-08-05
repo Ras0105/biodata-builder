@@ -40,12 +40,12 @@ export function render(formData) {
       </div>
 
       <div class="bd15-grid">
-        ${card(overview.title, overview.fields.map((f) => bullet(f.label, formData[f.id])).join(""))}
-        ${card(aboutMe.title, `<p class="bd15-paragraph">${esc(formData.aboutMe) || "&nbsp;"}</p>`)}
-        ${card(family.title, family.fields.map((f) => bullet(f.label, formData[f.id])).join(""))}
-        ${card(beliefs.title, beliefs.fields.map((f) => bullet(f.label, formData[f.id])).join(""))}
+        ${card(overview?.title, (overview?.fields || []).map((f) => bullet(f.label, formData[f.id])).join(""))}
+        ${card(aboutMe?.title, `<p class="bd15-paragraph">${esc(formData.aboutMe) || "&nbsp;"}</p>`)}
+        ${card(family?.title, (family?.fields || []).map((f) => bullet(f.label, formData[f.id])).join(""))}
+        ${card(beliefs?.title, (beliefs?.fields || []).map((f) => bullet(f.label, formData[f.id])).join(""))}
       </div>
 
-      ${card(expectations.title, `<p class="bd15-paragraph">${esc(formData.expectations) || "&nbsp;"}</p>`)}
+      ${card(expectations?.title, `<p class="bd15-paragraph">${esc(formData.expectations) || "&nbsp;"}</p>`)}
     </div>`;
 }

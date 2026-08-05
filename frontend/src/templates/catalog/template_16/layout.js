@@ -39,7 +39,7 @@ export function render(formData) {
         </div>
 
         <div class="bd16-block">
-          <h3 class="bd16-block-title">${esc(contact.title)}</h3>
+          <h3 class="bd16-block-title">${esc(contact?.title)}</h3>
           <div class="bd16-contact-list">
             ${formData.email ? `<div class="bd16-contact-item">&#9993; ${esc(formData.email)}</div>` : ""}
             ${formData.phone ? `<div class="bd16-contact-item">&#9742; ${esc(formData.phone)}</div>` : ""}
@@ -48,12 +48,12 @@ export function render(formData) {
         </div>
 
         <div class="bd16-block">
-          <h3 class="bd16-block-title">${esc(skillsLang.title.split(" & ")[0])}</h3>
+          <h3 class="bd16-block-title">${esc((skillsLang?.title || "").split(" & ")[0])}</h3>
           ${chipList(formData.skills)}
         </div>
 
         <div class="bd16-block">
-          <h3 class="bd16-block-title">${esc(skillsLang.title.split(" & ")[1])}</h3>
+          <h3 class="bd16-block-title">${esc((skillsLang?.title || "").split(" & ")[1])}</h3>
           ${chipList(formData.languages)}
         </div>
       </aside>
@@ -63,10 +63,10 @@ export function render(formData) {
         <div class="bd16-tagline">${esc(formData.tagline) || ""}</div>
         <div class="bd16-rule"></div>
 
-        ${iconHeading("&#9997;", about.title)}
+        ${iconHeading("&#9997;", about?.title)}
         <p class="bd16-about">${formData.aboutMe && formData.aboutMe.trim() ? esc(formData.aboutMe) : "&nbsp;"}</p>
 
-        ${iconHeading("&#127891;", education.title)}
+        ${iconHeading("&#127891;", education?.title)}
         <div class="bd16-timeline">
           ${[1, 2, 3].map((n) => {
             const title = formData[`eduTitle${n}`];
@@ -81,17 +81,17 @@ export function render(formData) {
           }).join("") || `<div class="bd16-empty">&nbsp;</div>`}
         </div>
 
-        ${iconHeading("&#128100;", personal.title)}
+        ${iconHeading("&#128100;", personal?.title)}
         <div class="bd16-section">
-          ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+          ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
         </div>
 
-        ${iconHeading("&#127961;", family.title)}
+        ${iconHeading("&#127961;", family?.title)}
         <div class="bd16-section">
-          ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+          ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
         </div>
 
-        ${iconHeading("&#128221;", declaration.title)}
+        ${iconHeading("&#128221;", declaration?.title)}
         <p class="bd16-about">I hereby declare that the above information is true and correct to the best of my knowledge.</p>
         <div class="bd16-sign-row">
           <span>Place: ${esc(formData.place) || "&nbsp;"}</span>

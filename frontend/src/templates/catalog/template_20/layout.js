@@ -12,9 +12,9 @@ function line(label, value) {
 function sectionBlock(section, formData) {
   return `
     <div class="bd20-block">
-      <h3 class="bd20-block-title">${esc(section.title)}</h3>
+      <h3 class="bd20-block-title">${esc(section?.title)}</h3>
       <div class="bd20-block-body">
-        ${section.fields.map((f) => line(f.label, formData[f.id])).join("")}
+        ${(section?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
       </div>
     </div>`;
 }
@@ -49,7 +49,7 @@ export function render(formData) {
         <div class="bd20-col">
           ${sectionBlock(personal, formData)}
           <div class="bd20-block">
-            <h3 class="bd20-block-title">${esc(education.title)}</h3>
+            <h3 class="bd20-block-title">${esc(education?.title)}</h3>
             <div class="bd20-block-body">
               ${eduLines.length
                 ? eduLines.map((l) => `<div class="bd20-edu-line">${esc(l)}</div>`).join("")
@@ -63,9 +63,9 @@ export function render(formData) {
       </div>
 
       <div class="bd20-mosal">
-        <h3 class="bd20-block-title">${esc(mosal.title)}</h3>
+        <h3 class="bd20-block-title">${esc(mosal?.title)}</h3>
         <div class="bd20-mosal-body">
-          ${mosal.fields.map((f) => line(f.label, formData[f.id])).join("")}
+          ${(mosal?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
         </div>
       </div>
     </div>`;

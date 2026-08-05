@@ -37,10 +37,10 @@ export function render(formData) {
             ${formData.dobDisplay && formData.dobDisplay.trim() ? `<div class="bd21-dob">${esc(formData.dobDisplay)}</div>` : ""}
           </div>
 
-          ${bar(personal.title, personal.fields.map((f) => line(f.label, formData[f.id])).join(""))}
-          ${bar(qualification.title, qualification.fields.map((f) => line(f.label, formData[f.id])).join(""))}
-          ${bar(family.title, family.fields.map((f) => line(f.label, formData[f.id])).join(""))}
-          ${bar(address.title, address.fields.map((f) => line(f.label, formData[f.id])).join(""))}
+          ${bar(personal?.title, (personal?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
+          ${bar(qualification?.title, (qualification?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
+          ${bar(family?.title, (family?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
+          ${bar(address?.title, (address?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
         </div>
       </div>
     </div>`;

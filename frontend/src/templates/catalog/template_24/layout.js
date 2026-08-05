@@ -29,28 +29,28 @@ export function render(formData) {
       </div>
 
       <div class="bd24-panel">
-        ${pill(profile.title)}
+        ${pill(profile?.title)}
         <div class="bd24-block">
-          ${profile.fields.filter((f) => f.id !== "fullName").map((f) => line(f.label, formData[f.id])).join("")}
+          ${(profile?.fields || []).filter((f) => f.id !== "fullName").map((f) => line(f.label, formData[f.id])).join("")}
         </div>
 
-        ${pill(occupation.title)}
+        ${pill(occupation?.title)}
         <div class="bd24-block">${formData.occupation && formData.occupation.trim() ? esc(formData.occupation) : "&nbsp;"}</div>
 
-        ${pill(education.title)}
+        ${pill(education?.title)}
         <div class="bd24-block">
           ${eduLines.length ? eduLines.map((l) => `<div class="bd24-line">${esc(l)}</div>`).join("") : "&nbsp;"}
         </div>
 
-        ${pill(family.title)}
+        ${pill(family?.title)}
         <div class="bd24-block">
-          ${family.fields.map((f) => line(f.label, formData[f.id])).join("")}
+          ${(family?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
         </div>
 
-        ${pill(interests.title)}
+        ${pill(interests?.title)}
         <div class="bd24-block">${formData.interests && formData.interests.trim() ? esc(formData.interests) : "&nbsp;"}</div>
 
-        ${pill(address.title)}
+        ${pill(address?.title)}
         <div class="bd24-block">${formData.address && formData.address.trim() ? esc(formData.address) : "&nbsp;"}</div>
       </div>
     </div>`;

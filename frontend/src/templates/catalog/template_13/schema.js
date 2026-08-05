@@ -6,60 +6,72 @@
 // Family is captured as a single narrative field rather than row-per-relative,
 // since the reference lists each sibling's marital status and occupation
 // inline as prose.
-
 export const schema = {
   id: "template_13",
-  photo: {
-    id: "photo",
-    label: "Photo",
-    shape: "circle",
-    required: true,
-  },
-  sections: [
+  photos: [
+    { id: "photo", label: "Photo", shape: "circle", required: true },
+  ],
+  pages: [
     {
-      id: "personal",
-      title: "Personal Details",
-      fields: [
-        { id: "fullName", label: "Name", type: "text", required: true },
-        { id: "religion", label: "Religion", type: "text" },
-        { id: "nationality", label: "Nationality", type: "text" },
-        { id: "dob", label: "Date of Birth", type: "date", required: true },
-        { id: "height", label: "Height", type: "text" },
-        { id: "education", label: "Education", type: "text" },
-        { id: "occupation", label: "Occupation", type: "text" },
-      ],
-    },
-    {
-      id: "family",
-      title: "Family Background",
-      fields: [
-        { id: "fatherName", label: "Father's Name", type: "text" },
-        { id: "motherName", label: "Mother's Name", type: "text" },
-        { id: "siblingsSummary", label: "Siblings", type: "textarea" },
-      ],
-    },
-    {
-      id: "expectations",
-      title: "Expectations",
-      fields: [
-        { id: "expectations", label: "Expectations", type: "textarea" },
-      ],
-    },
-    {
-      id: "contact",
-      title: "Contact",
-      fields: [
-        { id: "contactPhone", label: "Phone", type: "text", required: true },
-        { id: "residence", label: "Residence", type: "text" },
+      id: "page1",
+      sections: [
+        {
+          id: "personal",
+          title: "Personal Details",
+          removable: false,
+          custom: false,
+          fields: [
+            { id: "fullName", label: "Name", type: "text", required: true },
+            { id: "religion", label: "Religion", type: "text" },
+            { id: "nationality", label: "Nationality", type: "text" },
+            { id: "dob", label: "Date of Birth", type: "date", required: true },
+            { id: "height", label: "Height", type: "text" },
+            { id: "education", label: "Education", type: "text" },
+            { id: "occupation", label: "Occupation", type: "text" },
+          ],
+        },
+        {
+          id: "family",
+          title: "Family Background",
+          removable: true,
+          custom: false,
+          fields: [
+            { id: "fatherName", label: "Father's Name", type: "text" },
+            { id: "motherName", label: "Mother's Name", type: "text" },
+            { id: "siblingsSummary", label: "Siblings", type: "textarea" },
+          ],
+        },
+        {
+          id: "expectations",
+          title: "Expectations",
+          removable: true,
+          custom: false,
+          fields: [
+            { id: "expectations", label: "Expectations", type: "textarea" },
+          ],
+        },
+        {
+          id: "contact",
+          title: "Contact",
+          removable: true,
+          custom: false,
+          fields: [
+            { id: "contactPhone", label: "Phone", type: "text", required: true },
+            { id: "residence", label: "Residence", type: "text" },
+          ],
+        },
       ],
     },
   ],
 };
 
-export function emptyFormData() {
-  const data = { photo: null };
-  schema.sections.forEach((section) => {
-    section.fields.forEach((f) => { data[f.id] = ""; });
-  });
-  return data;
-}
+// --- temporary back-compat shim for layout.js (removed once layout.js is
+// migrated to the generic pages-aware renderer) ---
+Object.defineProperty(schema, "sections", {
+  get() { return schema.pages.flatMap((p) => p.sections); },
+  enumerable: false,
+});
+Object.defineProperty(schema, "photo", {
+  get() { return schema.photos[0]; },
+  enumerable: false,
+});

@@ -43,11 +43,11 @@ export function render(formData) {
       </div>
 
       <div class="bd10-grid">
-        ${card(overview.title, overview.fields.map((f) => bullet(f.label, formData[f.id])).join(""))}
-        ${card(aboutMe.title, `<p class="bd10-paragraph">${esc(formData.aboutMe) || "&nbsp;"}</p>`)}
-        ${card(expectations.title, `<p class="bd10-paragraph">${esc(formData.expectations) || "&nbsp;"}</p>`)}
-        ${card(family.title, family.fields.map((f) => bullet(f.label, formData[f.id])).join(""))}
-        ${card(beliefs.title, beliefs.fields.map((f) => bullet(f.label, formData[f.id])).join(""))}
+        ${card(overview?.title, (overview?.fields || []).map((f) => bullet(f.label, formData[f.id])).join(""))}
+        ${card(aboutMe?.title, `<p class="bd10-paragraph">${esc(formData.aboutMe) || "&nbsp;"}</p>`)}
+        ${card(expectations?.title, `<p class="bd10-paragraph">${esc(formData.expectations) || "&nbsp;"}</p>`)}
+        ${card(family?.title, (family?.fields || []).map((f) => bullet(f.label, formData[f.id])).join(""))}
+        ${card(beliefs?.title, (beliefs?.fields || []).map((f) => bullet(f.label, formData[f.id])).join(""))}
       </div>
     </div>`;
 }

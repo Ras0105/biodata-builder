@@ -38,28 +38,28 @@ export function render(formData) {
 
       <div class="bd13-two-col">
         <div class="bd13-col">
-          ${sectionTitle(personal.title)}
+          ${sectionTitle(personal?.title)}
           <div class="bd13-section">
-            ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+            ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
           </div>
 
-          ${sectionTitle(family.title)}
+          ${sectionTitle(family?.title)}
           <div class="bd13-section">
-            ${row(family.fields[0].label, formData[family.fields[0].id])}
-            ${row(family.fields[1].label, formData[family.fields[1].id])}
-            ${paragraph(formData[family.fields[2].id])}
+            ${row(family?.fields?.[0]?.label, formData[family?.fields?.[0]?.id])}
+            ${row(family?.fields?.[1]?.label, formData[family?.fields?.[1]?.id])}
+            ${paragraph(formData[family?.fields?.[2]?.id])}
           </div>
         </div>
 
         <div class="bd13-col">
-          ${sectionTitle(expectations.title)}
+          ${sectionTitle(expectations?.title)}
           <div class="bd13-section">
             ${paragraph(formData.expectations)}
           </div>
 
-          ${sectionTitle(contact.title)}
+          ${sectionTitle(contact?.title)}
           <div class="bd13-section">
-            ${contact.fields.map((f) => row(f.label, formData[f.id])).join("")}
+            ${(contact?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
           </div>
         </div>
       </div>

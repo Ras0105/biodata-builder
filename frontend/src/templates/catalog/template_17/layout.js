@@ -19,7 +19,7 @@ function fieldVal(formData, field) {
 }
 
 function highlightRow(formData, section, icon) {
-  const [f1, f2, note] = section.fields;
+  const [f1, f2, note] = (section?.fields || []);
   const v1 = fieldVal(formData, f1);
   const v2 = fieldVal(formData, f2);
   const vNote = fieldVal(formData, note);
@@ -27,7 +27,7 @@ function highlightRow(formData, section, icon) {
     <div class="bd17-highlight">
       <div class="bd17-highlight-icon">${icon}</div>
       <div class="bd17-highlight-body">
-        <div class="bd17-highlight-title">${esc(section.title)}</div>
+        <div class="bd17-highlight-title">${esc(section?.title)}</div>
         <div class="bd17-highlight-text">
           ${v1 ? `<span>${esc(f1.label)}: ${esc(v1)}</span>` : ""}
           ${v2 ? `<span>${esc(f2.label)}: ${esc(v2)}</span>` : ""}

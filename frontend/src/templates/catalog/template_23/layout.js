@@ -32,12 +32,12 @@ export function render(formData) {
 
       <div class="bd23-body">
         <div class="bd23-col">
-          <h3 class="bd23-col-title">${esc(personal.title)}</h3>
-          ${personal.fields.map((f) => line(f.label, formData[f.id])).join("")}
+          <h3 class="bd23-col-title">${esc(personal?.title)}</h3>
+          ${(personal?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
         </div>
         <div class="bd23-col">
-          <h3 class="bd23-col-title">${esc(family.title)}</h3>
-          ${family.fields.map((f) => line(f.label, formData[f.id])).join("")}
+          <h3 class="bd23-col-title">${esc(family?.title)}</h3>
+          ${(family?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
         </div>
       </div>
     </div>`;

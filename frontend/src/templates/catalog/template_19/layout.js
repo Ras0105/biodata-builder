@@ -42,14 +42,14 @@ export function render(formData) {
 
       <div class="bd19-grid">
         <div class="bd19-col-left">
-          ${card(about.title, `<p class="bd19-about">${formData.aboutMe && formData.aboutMe.trim() ? esc(formData.aboutMe) : "&nbsp;"}</p>`)}
-          ${card(family.title, family.fields.map((f) => line(f.label, formData[f.id])).join(""))}
+          ${card(about?.title, `<p class="bd19-about">${formData.aboutMe && formData.aboutMe.trim() ? esc(formData.aboutMe) : "&nbsp;"}</p>`)}
+          ${card(family?.title, (family?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
         </div>
         <div class="bd19-col-right">
-          ${card(timeline.title, timelineEntries.length
+          ${card(timeline?.title, timelineEntries.length
             ? `<ul class="bd19-timeline-list">${timelineEntries.map((e) => `<li>${esc(e)}</li>`).join("")}</ul>`
             : `<p class="bd19-about">&nbsp;</p>`)}
-          ${card(personal.title, personal.fields.map((f) => line(f.label, formData[f.id])).join(""))}
+          ${card(personal?.title, (personal?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
         </div>
       </div>
 

@@ -31,9 +31,9 @@ export function render(formData) {
 
       <div class="bd03-top-row">
         <div class="bd03-top-left">
-          ${sectionTitle(personal.title)}
+          ${sectionTitle(personal?.title)}
           <div class="bd03-section">
-            ${personal.fields.slice(0, 6).map((f) => row(f.label, formData[f.id])).join("")}
+            ${(personal?.fields || []).slice(0, 6).map((f) => row(f.label, formData[f.id])).join("")}
           </div>
         </div>
         <div class="bd03-photo-wrap">
@@ -44,17 +44,17 @@ export function render(formData) {
       </div>
 
       <div class="bd03-section">
-        ${personal.fields.slice(6).map((f) => row(f.label, formData[f.id])).join("")}
+        ${(personal?.fields || []).slice(6).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(family.title)}
+      ${sectionTitle(family?.title)}
       <div class="bd03-section">
-        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(contact.title)}
+      ${sectionTitle(contact?.title)}
       <div class="bd03-section">
-        ${contact.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(contact?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
       <div class="bd03-border-bottom"></div>

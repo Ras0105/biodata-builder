@@ -27,9 +27,9 @@ export function render(formData) {
 
       <div class="bd07-top-row">
         <div class="bd07-top-left">
-          <h2 class="bd07-section-title">${esc(personal.title)}</h2>
+          <h2 class="bd07-section-title">${esc(personal?.title)}</h2>
           <div class="bd07-section">
-            ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+            ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
           </div>
         </div>
         <div class="bd07-photo-wrap">
@@ -39,14 +39,14 @@ export function render(formData) {
         </div>
       </div>
 
-      <h2 class="bd07-section-title">${esc(family.title)}</h2>
+      <h2 class="bd07-section-title">${esc(family?.title)}</h2>
       <div class="bd07-section">
-        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      <h2 class="bd07-section-title">${esc(contact.title)}</h2>
+      <h2 class="bd07-section-title">${esc(contact?.title)}</h2>
       <div class="bd07-section">
-        ${contact.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(contact?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
     </div>`;
 }

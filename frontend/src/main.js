@@ -3,7 +3,11 @@ import { renderGallery } from "./components/templateGallery.js";
 import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
-import { state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft } from "./state.js";
+import {
+  state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
+  addSection, removeSection, renameSection, addFieldToSection, removeField,
+  addPage, removePage, addPhoto, removePhoto,
+} from "./state.js";
 
 const viewGallery = document.getElementById("view-gallery");
 const viewBuilder = document.getElementById("view-builder");
@@ -28,6 +32,30 @@ function showView() {
   viewBuilder.hidden = state.view !== "builder";
 }
 
+// Re-renders both the form panel and the live preview from current state.
+// Used after any structural change (add/remove section, page, photo, field)
+// since those change what the form and preview both need to display.
+function rerenderAll() {
+  renderForm(formMount, state.schema, state.formData, formCallbacks);
+  renderPreview(previewMount, state.templateId, state.schema, state.formData);
+}
+
+const formCallbacks = {
+  onFieldChange: (fieldId, value) => {
+    setField(fieldId, value);
+    renderPreview(previewMount, state.templateId, state.schema, state.formData);
+  },
+  onAddSection: (pageId, title) => { addSection(pageId, title); rerenderAll(); },
+  onRemoveSection: (pageId, sectionId) => { removeSection(pageId, sectionId); rerenderAll(); },
+  onRenameSection: (pageId, sectionId, title) => { renameSection(pageId, sectionId, title); rerenderAll(); },
+  onAddField: (pageId, sectionId, label) => { addFieldToSection(pageId, sectionId, label); rerenderAll(); },
+  onRemoveField: (pageId, sectionId, fieldId) => { removeField(pageId, sectionId, fieldId); rerenderAll(); },
+  onAddPage: () => { addPage(); rerenderAll(); },
+  onRemovePage: (pageId) => { removePage(pageId); rerenderAll(); },
+  onAddPhoto: () => { addPhoto(); rerenderAll(); },
+  onRemovePhoto: (photoId) => { removePhoto(photoId); rerenderAll(); },
+};
+
 async function onSelectTemplate(templateId, { updateHash = true } = {}) {
   const meta = getTemplateMeta(templateId);
   const { schema } = await meta.loadSchema();
@@ -39,12 +67,8 @@ async function onSelectTemplate(templateId, { updateHash = true } = {}) {
 
   if (updateHash) location.hash = `#/${templateId}`;
 
-  renderForm(formMount, state.schema, state.formData, (fieldId, value) => {
-    setField(fieldId, value);
-    renderPreview(previewMount, state.templateId, state.formData);
-  });
-
-  await renderPreview(previewMount, state.templateId, state.formData);
+  renderForm(formMount, state.schema, state.formData, formCallbacks);
+  await renderPreview(previewMount, state.templateId, state.schema, state.formData);
 }
 
 fullNameInput.addEventListener("input", (e) => { state.fullName = e.target.value; saveDraft(); });

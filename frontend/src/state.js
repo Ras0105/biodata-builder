@@ -1,5 +1,19 @@
 // state.js — small central store. No template-specific knowledge lives here.
 
+import {
+  cloneSchema,
+  emptyFormData,
+  addSection as _addSection,
+  removeSection as _removeSection,
+  renameSection as _renameSection,
+  addFieldToSection as _addFieldToSection,
+  removeField as _removeField,
+  addPage as _addPage,
+  removePage as _removePage,
+  addPhoto as _addPhoto,
+  removePhoto as _removePhoto,
+} from "./templates/schemaUtils.js";
+
 export const state = {
   view: "gallery", // "gallery" | "builder"
   templateId: null,
@@ -21,6 +35,9 @@ export function notify() {
 }
 
 // --- persistence ---
+// NOTE: drafts now also persist the mutated schema shape (pages/sections the
+// user added or removed), not just formData — otherwise a refresh would
+// restore old field values against the template's original, unmutated schema.
 function draftKey(templateId) {
   return `${DRAFT_PREFIX}${templateId}`;
 }
@@ -32,9 +49,14 @@ export function saveDraft() {
   saveTimer = setTimeout(() => {
     localStorage.setItem(
       draftKey(state.templateId),
-      JSON.stringify({ formData: state.formData, email: state.email, fullName: state.fullName })
+      JSON.stringify({
+        formData: state.formData,
+        email: state.email,
+        fullName: state.fullName,
+        schema: { id: state.schema.id, photos: state.schema.photos, pages: state.schema.pages },
+      })
     );
-  }, 300); // debounce so we don't hit localStorage on every keystroke
+  }, 300);
 }
 
 export function loadDraft(templateId) {
@@ -56,17 +78,20 @@ export function setField(fieldId, value) {
   notify();
 }
 
-export function selectTemplate(templateId, schema) {
+export function selectTemplate(templateId, rawSchema) {
   state.templateId = templateId;
-  state.schema = schema;
 
   const draft = loadDraft(templateId);
+  // If a draft saved a previously-mutated schema (user added/removed sections
+  // last time), restore THAT structure instead of the template's pristine one.
+  state.schema = draft?.schema ? cloneSchema(draft.schema) : cloneSchema(rawSchema);
+
   if (draft) {
-    state.formData = { ...schemaToEmptyData(schema), ...draft.formData };
+    state.formData = { ...emptyFormData(state.schema), ...draft.formData };
     state.email = draft.email || "";
     state.fullName = draft.fullName || "";
   } else {
-    state.formData = schemaToEmptyData(schema);
+    state.formData = emptyFormData(state.schema);
     state.email = "";
     state.fullName = "";
   }
@@ -83,12 +108,78 @@ export function backToGallery() {
   notify();
 }
 
-function schemaToEmptyData(schema) {
-  const data = { photo: null };
-  schema.sections.forEach((section) => {
-    section.fields.forEach((f) => {
-      data[f.id] = "";
-    });
+// --- structural mutation actions (form UI calls these; each re-notifies) ---
+
+function pruneOrphanedFormData() {
+  const validIds = new Set(state.schema.photos.map((p) => p.id));
+  state.schema.pages.forEach((page) =>
+    page.sections.forEach((s) => s.fields.forEach((f) => validIds.add(f.id)))
+  );
+  Object.keys(state.formData).forEach((key) => {
+    if (!validIds.has(key)) delete state.formData[key];
   });
-  return data;
+}
+
+export function addSection(pageId, title) {
+  const id = _addSection(state.schema, pageId, title);
+  if (id) saveDraft();
+  notify();
+  return id;
+}
+
+export function removeSection(pageId, sectionId) {
+  _removeSection(state.schema, pageId, sectionId);
+  pruneOrphanedFormData();
+  saveDraft();
+  notify();
+}
+
+export function renameSection(pageId, sectionId, newTitle) {
+  _renameSection(state.schema, pageId, sectionId, newTitle);
+  saveDraft();
+  notify();
+}
+
+export function addFieldToSection(pageId, sectionId, label) {
+  const id = _addFieldToSection(state.schema, pageId, sectionId, label);
+  if (id) state.formData[id] = "";
+  saveDraft();
+  notify();
+  return id;
+}
+
+export function removeField(pageId, sectionId, fieldId) {
+  _removeField(state.schema, pageId, sectionId, fieldId);
+  pruneOrphanedFormData();
+  saveDraft();
+  notify();
+}
+
+export function addPage() {
+  const id = _addPage(state.schema);
+  if (id) saveDraft();
+  notify();
+  return id;
+}
+
+export function removePage(pageId) {
+  _removePage(state.schema, pageId);
+  pruneOrphanedFormData();
+  saveDraft();
+  notify();
+}
+
+export function addPhoto(label) {
+  const id = _addPhoto(state.schema, label);
+  if (id) state.formData[id] = null;
+  saveDraft();
+  notify();
+  return id;
+}
+
+export function removePhoto(photoId) {
+  _removePhoto(state.schema, photoId);
+  pruneOrphanedFormData();
+  saveDraft();
+  notify();
 }

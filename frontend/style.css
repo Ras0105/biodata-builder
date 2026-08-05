@@ -153,3 +153,211 @@ body {
   .form-field input, .form-field textarea { font-size: 16px; } /* prevents iOS auto-zoom on focus */
 }
 
+
+/* --- dynamic pages/sections/photos (added for flexible builder) --- */
+
+.form-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-field-photo {
+  position: relative;
+}
+
+.form-page {
+  border-top: 1px dashed #d8d2c8;
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.form-page:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.form-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #6b5f4f;
+  margin-bottom: 8px;
+}
+
+.section-title-input {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  padding: 2px 4px;
+  width: auto;
+  min-width: 140px;
+}
+
+.section-title-input:hover,
+.section-title-input:focus {
+  background: #f4efe6;
+  border-radius: 4px;
+  outline: none;
+}
+
+.form-section legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #6b5f4f;
+}
+
+.btn-danger {
+  color: #b23b3b;
+}
+
+.btn-add-section,
+.btn-add-page,
+.btn-add-photo {
+  display: inline-block;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+.btn-add-field {
+  display: block;
+  margin: 6px 0 4px;
+}
+
+.btn-remove-field {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+/* --- generic renderer for user-added extras (custom sections, extra photos, extra pages) --- */
+/* Intentionally neutral styling so it looks reasonable on top of ANY of the 24 templates. */
+
+.bd-extra-wrap,
+.bd-extra-page {
+  background: #fff;
+  border-top: 2px dashed #cfc7b8;
+  padding: 20px 28px;
+  font-family: inherit;
+}
+
+.bd-extra-page {
+  margin-top: 24px;
+  border: 1px solid #e4ded2;
+  border-radius: 4px;
+}
+
+.bd-extra-page-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a8f7a;
+  margin-bottom: 12px;
+}
+
+.bd-extra-section {
+  margin-bottom: 16px;
+}
+
+.bd-extra-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4a4238;
+  border-bottom: 1px solid #e4ded2;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.bd-extra-row {
+  display: flex;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 13.5px;
+}
+
+.bd-extra-label {
+  min-width: 140px;
+  color: #6b5f4f;
+}
+
+.bd-extra-colon {
+  color: #6b5f4f;
+}
+
+.bd-extra-value {
+  color: #2c2620;
+  flex: 1;
+}
+
+.bd-extra-empty {
+  font-size: 13px;
+  color: #a89e8c;
+  font-style: italic;
+}
+
+.bd-extra-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.bd-extra-photo-item {
+  text-align: center;
+}
+
+.bd-extra-photo {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e4ded2;
+  display: block;
+}
+
+.bd-extra-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a89e8c;
+  font-size: 11px;
+  background: #f4efe6;
+}
+
+.bd-extra-photo-label {
+  font-size: 11px;
+  color: #8a8070;
+  margin-top: 4px;
+}
+
+.bd-render-error {
+  padding: 24px;
+  background: #fff5f0;
+  border: 1px solid #e8c9b8;
+  color: #8a4a2b;
+  font-size: 14px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+
+@media print {
+  .bd-extra-page {
+    page-break-before: always;
+  }
+}

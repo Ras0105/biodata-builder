@@ -34,19 +34,19 @@ export function render(formData) {
           : `<div class="bd14-photo bd14-photo-placeholder">छायाचित्रम्</div>`}
       </div>
 
-      ${sectionTitle(personal.title)}
+      ${sectionTitle(personal?.title)}
       <div class="bd14-section">
-        ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(jyotish.title)}
+      ${sectionTitle(jyotish?.title)}
       <div class="bd14-section">
-        ${jyotish.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(jyotish?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(family.title)}
+      ${sectionTitle(family?.title)}
       <div class="bd14-section">
-        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
     </div>`;
 }

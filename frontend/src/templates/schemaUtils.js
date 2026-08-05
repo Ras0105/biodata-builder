@@ -1,0 +1,142 @@
+// schemaUtils.js — GENERIC engine.
+// All page/section/photo mutation logic lives here so no template file,
+// and no per-template code, ever needs to know how to add/remove a section.
+// state.js is the only caller; it always works on a CLONED schema (see state.js),
+// never the cached module export, so mutations never leak across template switches.
+
+let uid = 0;
+function nextId(prefix) {
+  uid += 1;
+  return `${prefix}_${Date.now()}_${uid}`;
+}
+
+// Deep-clone a template's schema so runtime mutations (add/remove section,
+// rename, add page/photo) never touch the imported module's singleton object.
+export function cloneSchema(schema) {
+  const copy = JSON.parse(JSON.stringify({
+    id: schema.id,
+    photos: schema.photos,
+    pages: schema.pages,
+  }));
+  return withCompatGetters(copy);
+}
+
+// Temporary bridge for old per-template layout.js files that still read
+// schema.sections / schema.photo directly. Remove once all layout.js files
+// are migrated to the generic pages-aware renderer (step 2).
+function withCompatGetters(schema) {
+  Object.defineProperty(schema, "sections", {
+    get() {
+      return schema.pages.flatMap((p) => p.sections);
+    },
+    enumerable: false,
+  });
+  Object.defineProperty(schema, "photo", {
+    get() {
+      return schema.photos[0];
+    },
+    enumerable: false,
+  });
+  return schema;
+}
+
+export function emptyFormData(schema) {
+  const data = {};
+  schema.photos.forEach((p) => { data[p.id] = null; });
+  schema.pages.forEach((page) => {
+    page.sections.forEach((section) => {
+      section.fields.forEach((f) => { data[f.id] = ""; });
+    });
+  });
+  return data;
+}
+
+export function getMissingRequiredFields(schema, formData) {
+  const missing = [];
+  schema.photos.forEach((p) => {
+    if (p.required && !formData[p.id]) missing.push(p.label);
+  });
+  schema.pages.forEach((page) => {
+    page.sections.forEach((section) => {
+      section.fields.forEach((field) => {
+        if (field.required && !(formData[field.id] || "").toString().trim()) {
+          missing.push(field.label);
+        }
+      });
+    });
+  });
+  return missing;
+}
+
+// --- structural mutations (all return void/id; they mutate the cloned schema in place) ---
+
+export function addSection(schema, pageId, title) {
+  const page = schema.pages.find((p) => p.id === pageId);
+  if (!page) return null;
+  const section = {
+    id: nextId("section"),
+    title: title || "New Section",
+    removable: true,
+    custom: true,
+    fields: [],
+  };
+  page.sections.push(section);
+  return section.id;
+}
+
+export function removeSection(schema, pageId, sectionId) {
+  const page = schema.pages.find((p) => p.id === pageId);
+  if (!page) return;
+  const section = page.sections.find((s) => s.id === sectionId);
+  if (!section || section.removable === false) return;
+  page.sections = page.sections.filter((s) => s.id !== sectionId);
+}
+
+export function renameSection(schema, pageId, sectionId, newTitle) {
+  const page = schema.pages.find((p) => p.id === pageId);
+  const section = page?.sections.find((s) => s.id === sectionId);
+  if (section) section.title = newTitle;
+}
+
+export function addFieldToSection(schema, pageId, sectionId, label) {
+  const page = schema.pages.find((p) => p.id === pageId);
+  const section = page?.sections.find((s) => s.id === sectionId);
+  if (!section) return null;
+  const field = { id: nextId("field"), label: label || "New Field", type: "text", required: false, custom: true };
+  section.fields.push(field);
+  return field.id;
+}
+
+export function removeField(schema, pageId, sectionId, fieldId) {
+  const page = schema.pages.find((p) => p.id === pageId);
+  const section = page?.sections.find((s) => s.id === sectionId);
+  if (!section) return;
+  section.fields = section.fields.filter((f) => f.id !== fieldId);
+}
+
+const MAX_PAGES = 6;
+export function addPage(schema) {
+  if (schema.pages.length >= MAX_PAGES) return null;
+  const page = { id: nextId("page"), sections: [] };
+  schema.pages.push(page);
+  return page.id;
+}
+
+export function removePage(schema, pageId) {
+  if (schema.pages.length <= 1) return;
+  schema.pages = schema.pages.filter((p) => p.id !== pageId);
+}
+
+const MAX_PHOTOS = 4;
+export function addPhoto(schema, label) {
+  if (schema.photos.length >= MAX_PHOTOS) return null;
+  const photo = { id: nextId("photo"), label: label || "Additional Photo", shape: "square", required: false };
+  schema.photos.push(photo);
+  return photo.id;
+}
+
+export function removePhoto(schema, photoId) {
+  const photo = schema.photos.find((p) => p.id === photoId);
+  if (!photo || photo.required) return;
+  schema.photos = schema.photos.filter((p) => p.id !== photoId);
+}

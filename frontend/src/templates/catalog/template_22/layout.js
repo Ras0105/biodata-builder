@@ -33,24 +33,24 @@ export function render(formData) {
           <div class="bd22-name">${esc(formData.fullName) || "&nbsp;"}</div>
           <div class="bd22-rule"></div>
 
-          ${groupTitle(personal.title)}
+          ${groupTitle(personal?.title)}
           <div class="bd22-group">
-            ${personal.fields.map((f) => line(f.label, formData[f.id])).join("")}
+            ${(personal?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
           </div>
 
-          ${groupTitle(family.title)}
+          ${groupTitle(family?.title)}
           <div class="bd22-group">
-            ${family.fields.map((f) => line(f.label, formData[f.id])).join("")}
+            ${(family?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
           </div>
 
-          ${groupTitle(qualification.title)}
+          ${groupTitle(qualification?.title)}
           <div class="bd22-group">
-            ${qualification.fields.map((f) => line(f.label, formData[f.id])).join("")}
+            ${(qualification?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
           </div>
 
-          ${groupTitle(contact.title)}
+          ${groupTitle(contact?.title)}
           <div class="bd22-group">
-            ${contact.fields.map((f) => line(f.label, formData[f.id])).join("")}
+            ${(contact?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
           </div>
         </div>
       </div>

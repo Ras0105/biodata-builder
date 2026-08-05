@@ -31,9 +31,9 @@ export function render(formData) {
 
       <div class="bd06-top-row">
         <div class="bd06-top-left">
-          ${sectionTitle(personal.title)}
+          ${sectionTitle(personal?.title)}
           <div class="bd06-section-single">
-            ${personal.fields.slice(0, 8).map((f) => row(f.label, formData[f.id])).join("")}
+            ${(personal?.fields || []).slice(0, 8).map((f) => row(f.label, formData[f.id])).join("")}
           </div>
         </div>
         <div class="bd06-photo-wrap">
@@ -44,22 +44,22 @@ export function render(formData) {
       </div>
 
       <div class="bd06-section-single">
-        ${personal.fields.slice(8).map((f) => row(f.label, formData[f.id])).join("")}
+        ${(personal?.fields || []).slice(8).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(religious.title)}
+      ${sectionTitle(religious?.title)}
       <div class="bd06-section-pair">
-        ${religious.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(religious?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(family.title)}
+      ${sectionTitle(family?.title)}
       <div class="bd06-section-pair">
-        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionTitle(contact.title)}
+      ${sectionTitle(contact?.title)}
       <div class="bd06-section-pair">
-        ${contact.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(contact?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
     </div>`;
 }

@@ -38,14 +38,14 @@ export function render(formData) {
         }
       </div>
 
-      <h2 class="bd-section-title">${personal.title}</h2>
+      <h2 class="bd-section-title">${personal?.title}</h2>
       <div class="bd-section">
-        ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      <h2 class="bd-section-title">${family.title}</h2>
+      <h2 class="bd-section-title">${family?.title}</h2>
       <div class="bd-section">
-        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
     </div>`;
 }

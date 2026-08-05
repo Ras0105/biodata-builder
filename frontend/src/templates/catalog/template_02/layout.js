@@ -35,19 +35,19 @@ export function render(formData) {
           : `<div class="bd02-photo bd02-photo-placeholder">Photo</div>`}
       </div>
 
-      ${sectionHeader(personal.title)}
+      ${sectionHeader(personal?.title)}
       <div class="bd02-section">
-        ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionHeader(astro.title)}
+      ${sectionHeader(astro?.title)}
       <div class="bd02-section">
-        ${astro.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(astro?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
 
-      ${sectionHeader(family.title)}
+      ${sectionHeader(family?.title)}
       <div class="bd02-section">
-        ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
       </div>
     </div>`;
 }

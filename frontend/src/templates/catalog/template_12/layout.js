@@ -29,14 +29,14 @@ export function render(formData) {
 
       <div class="bd12-columns">
         <div class="bd12-col-left">
-          ${sectionTitle(birth.title)}
+          ${sectionTitle(birth?.title)}
           <div class="bd12-section">
-            ${birth.fields.slice(1).map((f) => stacked(f.label, formData[f.id])).join("")}
+            ${(birth?.fields || []).slice(1).map((f) => stacked(f.label, formData[f.id])).join("")}
           </div>
 
-          ${sectionTitle(education.title)}
+          ${sectionTitle(education?.title)}
           <div class="bd12-section">
-            ${education.fields.map((f) => stacked(f.label, formData[f.id])).join("")}
+            ${(education?.fields || []).map((f) => stacked(f.label, formData[f.id])).join("")}
           </div>
 
           <div class="bd12-photo-wrap">
@@ -47,14 +47,14 @@ export function render(formData) {
         </div>
 
         <div class="bd12-col-right">
-          ${sectionTitle(family.title)}
+          ${sectionTitle(family?.title)}
           <div class="bd12-section">
-            ${family.fields.map((f) => stacked(f.label, formData[f.id])).join("")}
+            ${(family?.fields || []).map((f) => stacked(f.label, formData[f.id])).join("")}
           </div>
 
-          ${sectionTitle(contact.title)}
+          ${sectionTitle(contact?.title)}
           <div class="bd12-section">
-            ${contact.fields.map((f) => stacked(f.label, formData[f.id])).join("")}
+            ${(contact?.fields || []).map((f) => stacked(f.label, formData[f.id])).join("")}
           </div>
         </div>
       </div>

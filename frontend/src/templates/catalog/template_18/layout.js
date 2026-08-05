@@ -37,19 +37,19 @@ export function render(formData) {
       </div>
 
       <div class="bd18-body">
-        ${sectionTitle(personal.title)}
+        ${sectionTitle(personal?.title)}
         <div class="bd18-section">
-          ${personal.fields.map((f) => row(f.label, formData[f.id])).join("")}
+          ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
         </div>
 
-        ${sectionTitle(family.title)}
+        ${sectionTitle(family?.title)}
         <div class="bd18-section">
-          ${family.fields.map((f) => row(f.label, formData[f.id])).join("")}
+          ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
         </div>
 
-        ${sectionTitle(contact.title)}
+        ${sectionTitle(contact?.title)}
         <div class="bd18-section">
-          ${contact.fields.map((f) => row(f.label, formData[f.id])).join("")}
+          ${(contact?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
         </div>
       </div>
     </div>`;
