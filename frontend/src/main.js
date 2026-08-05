@@ -6,7 +6,7 @@ import { startCheckout } from "./components/checkout.js";
 import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
-  addPage, removePage, addPhoto, removePhoto,
+  addPage, removePage, addPhoto, removePhoto, movePhoto, positionPhoto,
 } from "./state.js";
 
 const viewGallery = document.getElementById("view-gallery");
@@ -37,13 +37,13 @@ function showView() {
 // since those change what the form and preview both need to display.
 function rerenderAll() {
   renderForm(formMount, state.schema, state.formData, formCallbacks);
-  renderPreview(previewMount, state.templateId, state.schema, state.formData);
+  renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
 }
 
 const formCallbacks = {
   onFieldChange: (fieldId, value) => {
     setField(fieldId, value);
-    renderPreview(previewMount, state.templateId, state.schema, state.formData);
+    renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
   },
   onAddSection: (pageId, title) => { addSection(pageId, title); rerenderAll(); },
   onRemoveSection: (pageId, sectionId) => { removeSection(pageId, sectionId); rerenderAll(); },
@@ -54,6 +54,10 @@ const formCallbacks = {
   onRemovePage: (pageId) => { removePage(pageId); rerenderAll(); },
   onAddPhoto: () => { addPhoto(); rerenderAll(); },
   onRemovePhoto: (photoId) => { removePhoto(photoId); rerenderAll(); },
+  onMovePhoto: (photoId, pageId) => { movePhoto(photoId, pageId); rerenderAll(); },
+  // Drag/resize on the preview: persist only, no re-render (avoids flicker —
+  // the preview DOM already reflects the new position live during the drag).
+  onPhotoPosition: (photoId, pos) => { positionPhoto(photoId, pos); },
 };
 
 async function onSelectTemplate(templateId, { updateHash = true } = {}) {
@@ -68,7 +72,7 @@ async function onSelectTemplate(templateId, { updateHash = true } = {}) {
   if (updateHash) location.hash = `#/${templateId}`;
 
   renderForm(formMount, state.schema, state.formData, formCallbacks);
-  await renderPreview(previewMount, state.templateId, state.schema, state.formData);
+  await renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
 }
 
 fullNameInput.addEventListener("input", (e) => { state.fullName = e.target.value; saveDraft(); });

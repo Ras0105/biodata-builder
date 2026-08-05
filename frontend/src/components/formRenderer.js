@@ -29,7 +29,7 @@ export function renderForm(container, schema, formData, callbacks) {
     const pageHeader = document.createElement("div");
     pageHeader.className = "form-page-header";
     pageHeader.innerHTML = `<span>Page ${pageIndex + 1}</span>`;
-    if (schema.pages.length > 1) {
+    if (schema.pages.length > 1 && pageIndex > 0) {
       const removePageBtn = document.createElement("button");
       removePageBtn.type = "button";
       removePageBtn.className = "btn-link btn-danger";
@@ -72,7 +72,7 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
   const wrap = document.createElement("div");
   wrap.className = "form-photos";
 
-  schema.photos.forEach((photo) => {
+  schema.photos.forEach((photo, idx) => {
     const photoBlock = document.createElement("div");
     photoBlock.className = "form-field form-field-photo";
 
@@ -80,9 +80,27 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
       ? `<button type="button" class="btn-link btn-danger" data-remove-photo="${photo.id}">Remove</button>`
       : "";
 
+    // Primary photo (idx 0) is always locked into the template's designed
+    // spot. Extra photos can be placed on any page the user has — that's
+    // the "flexible photo placement" the builder offers.
+    const placementHtml =
+      idx > 0 && schema.pages.length > 0
+        ? `
+      <label class="photo-placement-label">Show on (drag it into place on the preview)</label>
+      <select data-move-photo="${photo.id}" class="photo-placement-select">
+        ${schema.pages
+          .map(
+            (p, i) =>
+              `<option value="${p.id}" ${(photo.page || schema.pages[0].id) === p.id ? "selected" : ""}>Page ${i + 1}</option>`
+          )
+          .join("")}
+      </select>`
+        : "";
+
     photoBlock.innerHTML = `
-      <label>${escAttr(photo.label)}${photo.required ? " *" : ""}</label>
+      <label>${escAttr(photo.label)}${photo.required ? " *" : ""}${idx === 0 ? " (main)" : ""}</label>
       <input type="file" accept="image/*" data-field="${photo.id}" data-photo="true" />
+      ${placementHtml}
       ${removeBtn}
     `;
     photoBlock.querySelector("input").addEventListener("change", (e) => {
@@ -94,6 +112,8 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
     });
     const removeEl = photoBlock.querySelector("[data-remove-photo]");
     if (removeEl) removeEl.addEventListener("click", () => callbacks.onRemovePhoto(photo.id));
+    const moveEl = photoBlock.querySelector("[data-move-photo]");
+    if (moveEl) moveEl.addEventListener("change", (e) => callbacks.onMovePhoto(photo.id, e.target.value));
 
     wrap.appendChild(photoBlock);
   });

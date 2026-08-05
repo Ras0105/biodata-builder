@@ -12,6 +12,8 @@ import {
   removePage as _removePage,
   addPhoto as _addPhoto,
   removePhoto as _removePhoto,
+  movePhoto as _movePhoto,
+  positionPhoto as _positionPhoto,
 } from "./templates/schemaUtils.js";
 
 export const state = {
@@ -182,4 +184,19 @@ export function removePhoto(photoId) {
   pruneOrphanedFormData();
   saveDraft();
   notify();
+}
+
+export function movePhoto(photoId, pageId) {
+  _movePhoto(state.schema, photoId, pageId);
+  saveDraft();
+  notify();
+}
+
+// Called after a drag/resize on the live preview. Deliberately does NOT
+// call notify()/trigger a form re-render — the preview already reflects the
+// new position live during the drag, so re-rendering here would just cause
+// a flicker. It only needs to persist.
+export function positionPhoto(photoId, pos) {
+  _positionPhoto(state.schema, photoId, pos);
+  saveDraft();
 }

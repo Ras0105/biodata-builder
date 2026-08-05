@@ -124,13 +124,35 @@ export function addPage(schema) {
 
 export function removePage(schema, pageId) {
   if (schema.pages.length <= 1) return;
+  if (pageId === schema.pages[0].id) return; // page 1 is never removable
   schema.pages = schema.pages.filter((p) => p.id !== pageId);
+  // Any photo that was placed on the removed page falls back to page 1
+  // instead of silently disappearing from every page.
+  const page1Id = schema.pages[0].id;
+  schema.photos.forEach((p) => {
+    if (p.page === pageId) p.page = page1Id;
+  });
 }
 
-const MAX_PHOTOS = 4;
+const MAX_PHOTOS = 8;
 export function addPhoto(schema, label) {
   if (schema.photos.length >= MAX_PHOTOS) return null;
-  const photo = { id: nextId("photo"), label: label || "Additional Photo", shape: "square", required: false };
+  const extraIndex = schema.photos.length - 1; // 0-based among extra (non-primary) photos
+  const col = extraIndex % 3;
+  const row = Math.floor(extraIndex / 3);
+  const photo = {
+    id: nextId("photo"),
+    label: label || "Additional Photo",
+    shape: "square",
+    required: false,
+    page: schema.pages[0]?.id, // which page it renders on; user can move it
+    // Freeform placement on that page — user can drag/resize in the live
+    // preview. Cascaded defaults so new photos don't stack on top of each other.
+    x: 40 + col * 150,
+    y: 40 + row * 150,
+    w: 120,
+    h: 120,
+  };
   schema.photos.push(photo);
   return photo.id;
 }
@@ -139,4 +161,23 @@ export function removePhoto(schema, photoId) {
   const photo = schema.photos.find((p) => p.id === photoId);
   if (!photo || photo.required) return;
   schema.photos = schema.photos.filter((p) => p.id !== photoId);
+}
+
+// Lets the user decide which PAGE a non-primary photo appears on (primary
+// photo stays in the template's designed slot; extra photos can go anywhere).
+export function movePhoto(schema, photoId, pageId) {
+  const photo = schema.photos.find((p) => p.id === photoId);
+  if (!photo || photo.required) return;
+  if (!schema.pages.some((p) => p.id === pageId)) return;
+  photo.page = pageId;
+}
+
+// Persists a drag/resize done directly on the live preview.
+export function positionPhoto(schema, photoId, { x, y, w, h }) {
+  const photo = schema.photos.find((p) => p.id === photoId);
+  if (!photo || photo.required) return;
+  if (x != null) photo.x = Math.max(0, x);
+  if (y != null) photo.y = Math.max(0, y);
+  if (w != null) photo.w = Math.max(50, w);
+  if (h != null) photo.h = Math.max(50, h);
 }

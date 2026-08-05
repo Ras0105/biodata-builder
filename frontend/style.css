@@ -86,8 +86,44 @@ body {
   font-family: inherit;
 }
 .form-field textarea { resize: vertical; min-height: 80px; }
-.preview-panel { display: flex; justify-content: center; }
+.preview-panel { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .preview-scale { transform-origin: top center; }
+
+/* ---- Canva-style page navigation (arrows + dots) ---- */
+.preview-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.preview-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #d5d2ca;
+  background: #fff;
+  color: #1f1c1a;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+.preview-arrow:hover:not(:disabled) { background: #f0ede6; }
+.preview-arrow:disabled { opacity: 0.35; cursor: default; }
+
+.preview-dots { display: flex; align-items: center; gap: 8px; }
+.preview-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  background: #d5d2ca;
+  cursor: pointer;
+  padding: 0;
+}
+.preview-dot.active { background: #1f1c1a; width: 22px; border-radius: 5px; }
 
 .btn {
   padding: 10px 18px;
@@ -247,103 +283,42 @@ body {
 }
 
 /* --- generic renderer for user-added extras (custom sections, extra photos, extra pages) --- */
-/* Intentionally neutral styling so it looks reasonable on top of ANY of the 24 templates. */
+/* NOTE: the extras themselves (headings, rows, photos) are styled inline by
+   dynamicExtras.js using each template's own theme (see templates/themes.js)
+   so they visually match that specific template — not overridden here. */
 
-.bd-extra-wrap,
-.bd-extra-page {
-  background: #fff;
-  border-top: 2px dashed #cfc7b8;
-  padding: 20px 28px;
+.photo-placement-label {
+  font-size: 11px;
+  color: #8a8070;
+  margin-top: 2px;
+}
+.photo-placement-select {
+  padding: 5px 8px;
+  border: 1px solid #d5d2ca;
+  border-radius: 6px;
+  font-size: 13px;
   font-family: inherit;
 }
 
-.bd-extra-page {
-  margin-top: 24px;
-  border: 1px solid #e4ded2;
-  border-radius: 4px;
+/* --- draggable/resizable extra photos on the live preview --- */
+.bd-user-photo { touch-action: none; }
+.bd-user-photo:hover { outline: 2px dashed rgba(0, 0, 0, 0.35); outline-offset: 2px; }
+.bd-user-photo-resize {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #1f1c1a;
+  cursor: nwse-resize;
+  touch-action: none;
 }
 
-.bd-extra-page-label {
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #9a8f7a;
-  margin-bottom: 12px;
-}
-
-.bd-extra-section {
-  margin-bottom: 16px;
-}
-
-.bd-extra-section-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #4a4238;
-  border-bottom: 1px solid #e4ded2;
-  padding-bottom: 6px;
-  margin-bottom: 8px;
-}
-
-.bd-extra-row {
-  display: flex;
-  gap: 8px;
-  padding: 3px 0;
-  font-size: 13.5px;
-}
-
-.bd-extra-label {
-  min-width: 140px;
-  color: #6b5f4f;
-}
-
-.bd-extra-colon {
-  color: #6b5f4f;
-}
-
-.bd-extra-value {
-  color: #2c2620;
-  flex: 1;
-}
-
-.bd-extra-empty {
-  font-size: 13px;
-  color: #a89e8c;
-  font-style: italic;
-}
-
-.bd-extra-photos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.bd-extra-photo-item {
-  text-align: center;
-}
-
-.bd-extra-photo {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid #e4ded2;
-  display: block;
-}
-
-.bd-extra-photo-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #a89e8c;
-  font-size: 11px;
-  background: #f4efe6;
-}
-
-.bd-extra-photo-label {
-  font-size: 11px;
-  color: #8a8070;
-  margin-top: 4px;
+@media print {
+  .bd-user-photo:hover { outline: none; }
+  .bd-user-photo-resize { display: none; }
 }
 
 .bd-render-error {
@@ -357,7 +332,7 @@ body {
 }
 
 @media print {
-  .bd-extra-page {
+  .bd-cont-page {
     page-break-before: always;
   }
 }
