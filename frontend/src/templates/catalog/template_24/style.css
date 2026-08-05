@@ -1,0 +1,82 @@
+/* style.css — template_24 (Coral Panel Profile). Visual skin only. */
+
+.bd-template24 {
+  position: relative;
+  width: 735px;
+  min-height: 1040px;
+  margin: 0 auto;
+  display: flex;
+  background: #ffffff;
+  box-sizing: border-box;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #2f2626;
+  overflow: hidden;
+}
+
+.bd-template24 .bd24-photo-col {
+  flex: 0 0 auto;
+  width: 250px;
+  padding: 30px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bd-template24 .bd24-photo {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.bd-template24 .bd24-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 260px;
+  border-radius: 4px;
+  background: #f2eeee;
+  color: #a89a9a;
+  font-size: 12px;
+}
+.bd-template24 .bd24-photo-name {
+  margin-top: 18px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #3d5a6c;
+  text-align: center;
+}
+
+.bd-template24 .bd24-panel {
+  flex: 1;
+  min-width: 0;
+  background: #f0949a;
+  padding: 30px 34px;
+  box-sizing: border-box;
+  color: #2f2020;
+}
+
+.bd-template24 .bd24-pill {
+  display: inline-block;
+  background: #ffffff;
+  color: #2f2020;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 3px;
+  margin: 16px 0 8px;
+}
+.bd-template24 .bd24-pill:first-child { margin-top: 0; }
+
+.bd-template24 .bd24-block {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #2f2020;
+}
+.bd-template24 .bd24-label { font-weight: 700; }
+
+@media print {
+  .bd-template24 { box-shadow: none; }
+}
