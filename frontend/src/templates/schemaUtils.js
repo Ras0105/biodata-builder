@@ -200,17 +200,15 @@ export function setPhotoStyle(schema, photoId, patch) {
   });
 }
 
-// Issue 15: re-order extra (non-primary) photos, which also controls their
-// stacking order in the live preview overlay (later in the array = drawn on
-// top), so the user can decide which photo sits "above" another.
-export function reorderPhoto(schema, photoId, direction) {
+// Issue 15: bring an extra (non-primary) photo to the front of the stack —
+// one click, that photo is now on top of every other photo. Stacking order
+// in the live preview overlay is just array order (later = drawn on top),
+// so this moves it to the end of the array.
+export function bringPhotoToFront(schema, photoId) {
   const idx = schema.photos.findIndex((p) => p.id === photoId);
   if (idx <= 0) return; // primary photo (index 0) is never reorderable
-  const swapWith = direction === "up" ? idx - 1 : idx + 1;
-  if (swapWith <= 0 || swapWith >= schema.photos.length) return;
-  const tmp = schema.photos[idx];
-  schema.photos[idx] = schema.photos[swapWith];
-  schema.photos[swapWith] = tmp;
+  const [photo] = schema.photos.splice(idx, 1);
+  schema.photos.push(photo);
 }
 
 // Issue 13: age gate for marriage-category biodatas. Returns null if it

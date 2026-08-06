@@ -8,7 +8,7 @@ import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
   addPage, removePage, addPhoto, removePhoto, movePhoto, positionPhoto,
-  setPhotoStyle, reorderPhoto, restartCurrentTemplate,
+  setPhotoStyle, bringPhotoToFront, restartCurrentTemplate,
 } from "./state.js";
 
 const viewGallery = document.getElementById("view-gallery");
@@ -59,7 +59,7 @@ const formCallbacks = {
   onRemovePhoto: (photoId) => { removePhoto(photoId); rerenderAll(); },
   onMovePhoto: (photoId, pageId) => { movePhoto(photoId, pageId); rerenderAll(); },
   onPhotoStyle: (photoId, patch) => { setPhotoStyle(photoId, patch); rerenderAll(); },
-  onReorderPhoto: (photoId, direction) => { reorderPhoto(photoId, direction); rerenderAll(); },
+  onPhotoToFront: (photoId) => { bringPhotoToFront(photoId); rerenderAll(); },
   // Drag/resize on the preview: persist only, no re-render (avoids flicker —
   // the preview DOM already reflects the new position live during the drag).
   onPhotoPosition: (photoId, pos) => { positionPhoto(photoId, pos); },

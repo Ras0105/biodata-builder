@@ -101,13 +101,11 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
     // controls and up/down ordering (which also controls stacking order —
     // "above/below" — since dynamicExtras draws later photos on top).
     const styleHtml = idx > 0 ? photoStyleControlsHtml(photo) : "";
+    // Issue 15: one button — click it and that photo jumps above every
+    // other photo (no more fiddly repeated up/down clicking to reorder).
     const reorderHtml =
       idx > 0
-        ? `
-      <div class="photo-reorder">
-        <button type="button" class="btn-link" data-reorder-photo="${photo.id}" data-dir="up" title="Bring above the photo below it">&#8593; Move up</button>
-        <button type="button" class="btn-link" data-reorder-photo="${photo.id}" data-dir="down" title="Send below the photo above it">&#8595; Move down</button>
-      </div>`
+        ? `<button type="button" class="btn-link photo-to-front" data-photo-front="${photo.id}" title="Bring this photo above the others">&#8593; Bring to front</button>`
         : "";
 
     photoBlock.innerHTML = `
@@ -130,9 +128,8 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
     const moveEl = photoBlock.querySelector("[data-move-photo]");
     if (moveEl) moveEl.addEventListener("change", (e) => callbacks.onMovePhoto(photo.id, e.target.value));
     wirePhotoStyleControls(photoBlock, photo, callbacks);
-    photoBlock.querySelectorAll("[data-reorder-photo]").forEach((btn) => {
-      btn.addEventListener("click", () => callbacks.onReorderPhoto(photo.id, btn.dataset.dir));
-    });
+    const frontBtn = photoBlock.querySelector("[data-photo-front]");
+    if (frontBtn) frontBtn.addEventListener("click", () => callbacks.onPhotoToFront(photo.id));
 
     wrap.appendChild(photoBlock);
   });

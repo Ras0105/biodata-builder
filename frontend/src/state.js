@@ -15,7 +15,7 @@ import {
   movePhoto as _movePhoto,
   positionPhoto as _positionPhoto,
   setPhotoStyle as _setPhotoStyle,
-  reorderPhoto as _reorderPhoto,
+  bringPhotoToFront as _bringPhotoToFront,
 } from "./templates/schemaUtils.js";
 
 export const state = {
@@ -210,9 +210,9 @@ export function setPhotoStyle(photoId, patch) {
   notify();
 }
 
-// Issue 15: move a photo up/down the stack (also its visual "above/below" order).
-export function reorderPhoto(photoId, direction) {
-  _reorderPhoto(state.schema, photoId, direction);
+// Issue 15: one click brings that photo to the front (above every other photo).
+export function bringPhotoToFront(photoId) {
+  _bringPhotoToFront(state.schema, photoId);
   saveDraft();
   notify();
 }
