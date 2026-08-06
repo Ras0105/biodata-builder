@@ -71,6 +71,13 @@
   gap: 6px 18px;
 }
 
+/* Personal Details is split across two title-less blocks (fields 1-8 beside
+   the photo, the rest below) — without a gap between them the last field of
+   the first block collides visually with the first field of the second. */
+.bd-template04 .bd04-section-single + .bd04-section-single {
+  margin-top: 6px;
+}
+
 .bd-template04 .bd04-row {
   display: grid;
   grid-template-columns: 150px 1fr;

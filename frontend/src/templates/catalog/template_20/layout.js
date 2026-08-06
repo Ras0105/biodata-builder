@@ -5,6 +5,16 @@ function esc(str) {
   return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
+// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
+// other field type untouched.
+function fmt(field, value) {
+  if (field.type !== "date" || !value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function line(label, value) {
   return `<div class="bd20-line"><span class="bd20-line-label">${esc(label)}</span><span class="bd20-line-sep">:</span><span class="bd20-line-value">${value && value.trim() ? esc(value) : "&nbsp;"}</span></div>`;
 }
@@ -14,13 +24,19 @@ function sectionBlock(section, formData) {
     <div class="bd20-block">
       <h3 class="bd20-block-title">${esc(section?.title)}</h3>
       <div class="bd20-block-body">
-        ${(section?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
+        ${(section?.fields || []).map((f) => line(f.label, fmt(f, formData[f.id]))).join("")}
       </div>
     </div>`;
 }
 
 export function render(formData, liveSchema) {
-  const [profile, contact, personal, education, parents, mosal] = (liveSchema || schema).sections;
+    const sections = (liveSchema || schema).sections;
+  const profile = sections.find((s) => s.id === "profile");
+  const contact = sections.find((s) => s.id === "contact");
+  const personal = sections.find((s) => s.id === "personal");
+  const education = sections.find((s) => s.id === "education");
+  const parents = sections.find((s) => s.id === "parents");
+  const mosal = sections.find((s) => s.id === "mosal");
   const photoSrc = formData.photo || "";
   const eduLines = [formData.eduLine1, formData.eduLine2, formData.eduLine3].filter((v) => v && v.trim());
 
@@ -65,7 +81,7 @@ export function render(formData, liveSchema) {
       <div class="bd20-mosal">
         <h3 class="bd20-block-title">${esc(mosal?.title)}</h3>
         <div class="bd20-mosal-body">
-          ${(mosal?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
+          ${(mosal?.fields || []).map((f) => line(f.label, fmt(f, formData[f.id]))).join("")}
         </div>
       </div>
     </div>`;

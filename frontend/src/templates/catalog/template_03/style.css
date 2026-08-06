@@ -73,6 +73,14 @@
   gap: 9px;
 }
 
+/* The "overflow" personal fields (beyond the 6 shown beside the photo)
+   render as a second, title-less .bd03-section right after .bd03-top-row.
+   Without this, that row sits flush against the last photo-row field with
+   no gap, so it visually collides with it (e.g. Height / Gotra bug). */
+.bd-template03 .bd03-top-row + .bd03-section {
+  margin-top: 9px;
+}
+
 .bd-template03 .bd03-row {
   display: grid;
   grid-template-columns: 160px 1fr;

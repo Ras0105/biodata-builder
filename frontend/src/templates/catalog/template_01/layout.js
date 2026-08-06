@@ -8,6 +8,16 @@ function esc(str) {
   return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
+// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
+// other field type untouched.
+function fmt(field, value) {
+  if (field.type !== "date" || !value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function row(label, value) {
   return `
     <div class="bd-row">
@@ -18,8 +28,9 @@ function row(label, value) {
 }
 
 export function render(formData, liveSchema) {
-  const personal = (liveSchema || schema).sections[0];
-  const family = (liveSchema || schema).sections[1];
+  const sections = (liveSchema || schema).sections;
+  const personal = sections.find((s) => s.id === "personal");
+  const family = sections.find((s) => s.id === "family");
 
   const photoSrc = formData.photo || "";
 
@@ -38,14 +49,16 @@ export function render(formData, liveSchema) {
         }
       </div>
 
-      <h2 class="bd-section-title">${personal?.title}</h2>
+      ${personal ? `
+      <h2 class="bd-section-title">${esc(personal.title)}</h2>
       <div class="bd-section">
-        ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
-      </div>
+        ${(personal.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
+      </div>` : ""}
 
-      <h2 class="bd-section-title">${family?.title}</h2>
+      ${family ? `
+      <h2 class="bd-section-title">${esc(family.title)}</h2>
       <div class="bd-section">
-        ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
-      </div>
+        ${(family.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
+      </div>` : ""}
     </div>`;
 }

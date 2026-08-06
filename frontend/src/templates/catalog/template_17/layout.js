@@ -7,6 +7,16 @@ function esc(str) {
   return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
+// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
+// other field type untouched.
+function fmt(field, value) {
+  if (field.type !== "date" || !value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 const ICONS = {
   personalHighlight: "&#9679;",
   familyHighlight: "&#9873;",
@@ -15,7 +25,7 @@ const ICONS = {
 };
 
 function fieldVal(formData, field) {
-  return field ? (formData[field.id] || "").toString().trim() : "";
+  return field ? fmt(field, (formData[field.id] || "").toString().trim()) : "";
 }
 
 function highlightRow(formData, section, icon) {
@@ -38,7 +48,14 @@ function highlightRow(formData, section, icon) {
 }
 
 export function render(formData, liveSchema) {
-  const [profile, personalHighlight, familyHighlight, careerHighlight, beliefsHighlight, declaration, contact] = (liveSchema || schema).sections;
+    const sections = (liveSchema || schema).sections;
+  const profile = sections.find((s) => s.id === "profile");
+  const personalHighlight = sections.find((s) => s.id === "personalHighlight");
+  const familyHighlight = sections.find((s) => s.id === "familyHighlight");
+  const careerHighlight = sections.find((s) => s.id === "careerHighlight");
+  const beliefsHighlight = sections.find((s) => s.id === "beliefsHighlight");
+  const declaration = sections.find((s) => s.id === "declaration");
+  const contact = sections.find((s) => s.id === "contact");
   const photoSrc = formData.photo || "";
   const nameParts = (formData.fullName || "").trim().split(/\s+/);
   const firstName = nameParts[0] || "";

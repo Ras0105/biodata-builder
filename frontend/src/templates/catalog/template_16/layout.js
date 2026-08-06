@@ -7,6 +7,16 @@ function esc(str) {
   return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
+// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
+// other field type untouched.
+function fmt(field, value) {
+  if (field.type !== "date" || !value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function chipList(value) {
   const items = (value || "").split(",").map((s) => s.trim()).filter(Boolean);
   if (!items.length) return `<div class="bd16-empty">&nbsp;</div>`;
@@ -26,7 +36,15 @@ function row(label, value) {
 }
 
 export function render(formData, liveSchema) {
-  const [profile, contact, about, education, skillsLang, personal, family, declaration] = (liveSchema || schema).sections;
+    const sections = (liveSchema || schema).sections;
+  const profile = sections.find((s) => s.id === "profile");
+  const contact = sections.find((s) => s.id === "contact");
+  const about = sections.find((s) => s.id === "about");
+  const education = sections.find((s) => s.id === "education");
+  const skillsLang = sections.find((s) => s.id === "skillsLang");
+  const personal = sections.find((s) => s.id === "personal");
+  const family = sections.find((s) => s.id === "family");
+  const declaration = sections.find((s) => s.id === "declaration");
   const photoSrc = formData.photo || "";
 
   return `
@@ -83,12 +101,12 @@ export function render(formData, liveSchema) {
 
         ${iconHeading("&#128100;", personal?.title)}
         <div class="bd16-section">
-          ${(personal?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
+          ${(personal?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
         </div>
 
         ${iconHeading("&#127961;", family?.title)}
         <div class="bd16-section">
-          ${(family?.fields || []).map((f) => row(f.label, formData[f.id])).join("")}
+          ${(family?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
         </div>
 
         ${iconHeading("&#128221;", declaration?.title)}

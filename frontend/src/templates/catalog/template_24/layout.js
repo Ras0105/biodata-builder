@@ -5,6 +5,16 @@ function esc(str) {
   return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
+// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
+// other field type untouched.
+function fmt(field, value) {
+  if (field.type !== "date" || !value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function pill(title) {
   return `<div class="bd24-pill">${esc(title)}</div>`;
 }
@@ -15,7 +25,13 @@ function line(label, value) {
 }
 
 export function render(formData, liveSchema) {
-  const [profile, occupation, education, family, interests, address] = (liveSchema || schema).sections;
+    const sections = (liveSchema || schema).sections;
+  const profile = sections.find((s) => s.id === "profile");
+  const occupation = sections.find((s) => s.id === "occupation");
+  const education = sections.find((s) => s.id === "education");
+  const family = sections.find((s) => s.id === "family");
+  const interests = sections.find((s) => s.id === "interests");
+  const address = sections.find((s) => s.id === "address");
   const photoSrc = formData.photo || "";
   const eduLines = [formData.eduLine1, formData.eduLine2, formData.eduLine3].filter((v) => v && v.trim());
 
@@ -31,7 +47,7 @@ export function render(formData, liveSchema) {
       <div class="bd24-panel">
         ${pill(profile?.title)}
         <div class="bd24-block">
-          ${(profile?.fields || []).filter((f) => f.id !== "fullName").map((f) => line(f.label, formData[f.id])).join("")}
+          ${(profile?.fields || []).filter((f) => f.id !== "fullName").map((f) => line(f.label, fmt(f, formData[f.id]))).join("")}
         </div>
 
         ${pill(occupation?.title)}
@@ -44,7 +60,7 @@ export function render(formData, liveSchema) {
 
         ${pill(family?.title)}
         <div class="bd24-block">
-          ${(family?.fields || []).map((f) => line(f.label, formData[f.id])).join("")}
+          ${(family?.fields || []).map((f) => line(f.label, fmt(f, formData[f.id]))).join("")}
         </div>
 
         ${pill(interests?.title)}

@@ -65,6 +65,12 @@
   flex-direction: column;
   gap: 8px;
 }
+
+/* Personal Details splits across two title-less blocks (fields beside the
+   photo, then the rest below) — without this the boundary fields collide. */
+.bd-template09 .bd09-top-row + .bd09-section {
+  margin-top: 8px;
+}
 .bd-template09 .bd09-row {
   display: grid;
   grid-template-columns: 170px 14px 1fr;

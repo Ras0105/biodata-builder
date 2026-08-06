@@ -7,6 +7,16 @@ function esc(str) {
   return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
+// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
+// other field type untouched.
+function fmt(field, value) {
+  if (field.type !== "date" || !value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function card(title, innerHtml) {
   return `
     <div class="bd19-card">
@@ -20,7 +30,13 @@ function line(label, value) {
 }
 
 export function render(formData, liveSchema) {
-  const [profile, about, timeline, personal, family, contact] = (liveSchema || schema).sections;
+    const sections = (liveSchema || schema).sections;
+  const profile = sections.find((s) => s.id === "profile");
+  const about = sections.find((s) => s.id === "about");
+  const timeline = sections.find((s) => s.id === "timeline");
+  const personal = sections.find((s) => s.id === "personal");
+  const family = sections.find((s) => s.id === "family");
+  const contact = sections.find((s) => s.id === "contact");
   const photoSrc = formData.photo || "";
   const timelineEntries = [1, 2, 3, 4]
     .map((n) => formData[`timelineItem${n}`])
@@ -43,13 +59,13 @@ export function render(formData, liveSchema) {
       <div class="bd19-grid">
         <div class="bd19-col-left">
           ${card(about?.title, `<p class="bd19-about">${formData.aboutMe && formData.aboutMe.trim() ? esc(formData.aboutMe) : "&nbsp;"}</p>`)}
-          ${card(family?.title, (family?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
+          ${card(family?.title, (family?.fields || []).map((f) => line(f.label, fmt(f, formData[f.id]))).join(""))}
         </div>
         <div class="bd19-col-right">
           ${card(timeline?.title, timelineEntries.length
             ? `<ul class="bd19-timeline-list">${timelineEntries.map((e) => `<li>${esc(e)}</li>`).join("")}</ul>`
             : `<p class="bd19-about">&nbsp;</p>`)}
-          ${card(personal?.title, (personal?.fields || []).map((f) => line(f.label, formData[f.id])).join(""))}
+          ${card(personal?.title, (personal?.fields || []).map((f) => line(f.label, fmt(f, formData[f.id]))).join(""))}
         </div>
       </div>
 
