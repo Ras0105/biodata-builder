@@ -260,3 +260,23 @@ export function listTemplates() {
     thumbnail,
   }));
 }
+
+// --- category derivation (Issue 1 & 12) ---
+// A template's filter categories are DERIVED from its `community` field —
+// nothing here needs editing when a new template is added. Every non-
+// "General" community is automatically also tagged "Marriage" (issue 12),
+// since all religious biodatas on this site are marriage biodatas; General
+// templates are left as-is (resume-style / non-marriage use is allowed).
+export function getCategories(meta) {
+  const community = meta.community || "General";
+  return community === "General" ? [community] : [community, "Marriage"];
+}
+
+// Unique, sorted category list across the whole registry, with "All" first.
+// Automatically picks up any new community introduced by a future template.
+export function listCategories() {
+  const set = new Set();
+  TEMPLATE_REGISTRY.forEach((t) => getCategories(t).forEach((c) => set.add(c)));
+  const rest = Array.from(set).sort((a, b) => (a === "Marriage") - (b === "Marriage") || a.localeCompare(b));
+  return ["All", ...rest];
+}

@@ -30,10 +30,13 @@ function sectionHtml(theme, section, formData) {
         </div>`;
     })
     .join("");
+  // Issue 9 & 10: a section with no fields (yet, or by design — e.g. a
+  // "Photos" section that's just a heading) renders as the title plus its
+  // own breathing room, never a "No fields added yet" placeholder line.
   return `
-    <div style="margin-bottom:22px;">
+    <div style="margin-bottom:22px;min-height:${rows ? "0" : "14px"};">
       <h3 style="font-size:18px;font-weight:700;letter-spacing:.01em;margin:0 0 10px;padding-bottom:8px;border-bottom:2px solid ${theme.accent};color:${theme.accent};">${esc(section.title)}</h3>
-      ${rows || `<div style="font-size:13px;font-style:italic;opacity:.65;">No fields added yet.</div>`}
+      ${rows}
     </div>`;
 }
 
@@ -44,8 +47,10 @@ function sectionHtml(theme, section, formData) {
 function buildSectionsBlock(theme, sections, formData, { topBorder } = {}) {
   if (!sections.length) return "";
   return `
-    <div style="grid-column:1/-1;flex:0 0 100%;width:100%;box-sizing:border-box;${
-      topBorder ? `margin-top:26px;padding-top:22px;border-top:1px dashed ${theme.accent};` : ""
+    <div style="grid-column:1/-1;flex:0 0 100%;width:100%;box-sizing:border-box;overflow-wrap:break-word;${
+      // Issue 8: a plain, subtle solid rule instead of a dashed line — reads
+      // as an intentional section divider rather than a placeholder/broken look.
+      topBorder ? `margin-top:26px;padding-top:22px;border-top:1px solid ${theme.accent};` : ""
     }font-family:${theme.font};color:${theme.text};">
       ${sections.map((s) => sectionHtml(theme, s, formData)).join("")}
     </div>`;
@@ -55,6 +60,18 @@ function photoShapeStyle(shape) {
   if (shape === "circle") return "border-radius:50%;";
   if (shape === "rect") return "border-radius:4px;";
   return "border-radius:8px;"; // square/default
+}
+
+// Issue 16: CSS filter presets for extra photos.
+function photoFilterCss(filter) {
+  switch (filter) {
+    case "grayscale": return "filter:grayscale(1);";
+    case "sepia": return "filter:sepia(0.8);";
+    case "vintage": return "filter:sepia(0.35) contrast(1.05) brightness(1.05) saturate(1.15);";
+    case "cool": return "filter:hue-rotate(-8deg) saturate(1.1) brightness(1.02);";
+    case "soft": return "filter:contrast(0.95) brightness(1.05) saturate(0.9);";
+    default: return "";
+  }
 }
 
 // Freeform, draggable/resizable photo overlay. `position:absolute` takes it
@@ -68,27 +85,42 @@ function photoOverlayHtml(theme, photo, formData) {
   const y = photo.y ?? 40;
   const w = photo.w ?? 120;
   const h = photo.h ?? 120;
+  const filterCss = photoFilterCss(photo.filter);
   const inner = src
-    ? `<img src="${src}" alt="${esc(photo.label)}" style="width:100%;height:100%;object-fit:cover;display:block;${shapeCss}" />`
+    ? `<img src="${src}" alt="${esc(photo.label)}" style="width:100%;height:100%;object-fit:cover;display:block;${shapeCss}${filterCss}" />`
     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;opacity:.65;background:rgba(128,128,128,0.15);${shapeCss}">${esc(photo.label)}</div>`;
+
+  // Issue 4 & 16: border style/width/color are per-photo and user-editable
+  // (falls back to the template's own accent color/solid/3px when unset).
+  const bStyle = photo.borderStyle || "solid";
+  const bWidth = photo.borderWidth ?? 3;
+  const bColor = photo.borderColor || theme.accent;
+  const borderCss = bStyle === "none" ? "border:none;" : `border:${bWidth}px ${bStyle} ${bColor};`;
 
   return `
     <div class="bd-user-photo" data-photo-drag="${photo.id}" style="
       position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;
-      border:3px solid ${theme.accent};box-sizing:border-box;cursor:move;${shapeCss}
+      ${borderCss}box-sizing:border-box;cursor:move;pointer-events:auto;${shapeCss}
     ">
       ${inner}
       <div class="bd-user-photo-resize" data-photo-resize="${photo.id}"></div>
     </div>`;
 }
 
+// Issues 3 & 5: each photo used to be wrapped in its own `inset:0` div —
+// i.e. a full-page-covering box per photo. The LAST (newest) photo's
+// invisible full-page box sat on top of everything in the stacking order
+// and silently ate every pointer event across the whole page, including
+// clicks/drags meant for older photos underneath — that's why an older
+// photo became impossible to move/select once a newer one was added.
+// Fix: no full-page wrapper at all. The layer itself stays pointer-events:none
+// (so it never blocks the template under it) and only the actual photo
+// boxes (sized to themselves, see `pointer-events:auto` above) accept clicks.
 function photosOverlayHtml(theme, photos, formData) {
   if (!photos.length) return "";
-  // pointer-events:none on the wrapper (so it never blocks clicks on the
-  // template underneath), each photo re-enables pointer-events:auto.
   return `
     <div class="bd-user-photo-layer" style="position:absolute;inset:0;pointer-events:none;">
-      ${photos.map((p) => `<div style="pointer-events:auto;position:absolute;inset:0;">${photoOverlayHtml(theme, p, formData)}</div>`).join("")}
+      ${photos.map((p) => photoOverlayHtml(theme, p, formData)).join("")}
     </div>`;
 }
 

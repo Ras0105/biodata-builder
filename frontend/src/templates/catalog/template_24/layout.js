@@ -14,8 +14,8 @@ function line(label, value) {
   return `<div class="bd24-line"><span class="bd24-label">${esc(label)}:</span> ${esc(value)}</div>`;
 }
 
-export function render(formData) {
-  const [profile, occupation, education, family, interests, address] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, occupation, education, family, interests, address] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
   const eduLines = [formData.eduLine1, formData.eduLine2, formData.eduLine3].filter((v) => v && v.trim());
 

@@ -19,8 +19,8 @@ function line(label, value) {
   return `<div class="bd19-line"><span class="bd19-line-label">${esc(label)}</span><span class="bd19-line-value">${value && value.trim() ? esc(value) : "&nbsp;"}</span></div>`;
 }
 
-export function render(formData) {
-  const [profile, about, timeline, personal, family, contact] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, about, timeline, personal, family, contact] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
   const timelineEntries = [1, 2, 3, 4]
     .map((n) => formData[`timelineItem${n}`])

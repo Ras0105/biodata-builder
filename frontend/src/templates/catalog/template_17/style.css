@@ -9,7 +9,7 @@
   box-sizing: border-box;
   font-family: "Helvetica Neue", Arial, sans-serif;
   color: #f2f0ec;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template17 .bd17-hero {

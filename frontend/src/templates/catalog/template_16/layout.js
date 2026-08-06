@@ -25,8 +25,8 @@ function row(label, value) {
     </div>`;
 }
 
-export function render(formData) {
-  const [profile, contact, about, education, skillsLang, personal, family, declaration] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, contact, about, education, skillsLang, personal, family, declaration] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

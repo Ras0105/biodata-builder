@@ -19,8 +19,8 @@ function sectionHeader(title) {
   return `<div class="bd02-section-title"><span>${esc(title)}</span></div>`;
 }
 
-export function render(formData) {
-  const [personal, astro, family] = schema.sections;
+export function render(formData, liveSchema) {
+  const [personal, astro, family] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

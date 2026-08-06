@@ -14,6 +14,8 @@ import {
   removePhoto as _removePhoto,
   movePhoto as _movePhoto,
   positionPhoto as _positionPhoto,
+  setPhotoStyle as _setPhotoStyle,
+  reorderPhoto as _reorderPhoto,
 } from "./templates/schemaUtils.js";
 
 export const state = {
@@ -199,4 +201,32 @@ export function movePhoto(photoId, pageId) {
 export function positionPhoto(photoId, pos) {
   _positionPhoto(state.schema, photoId, pos);
   saveDraft();
+}
+
+// Issue 4 & 16: shape/border/filter styling for an extra photo.
+export function setPhotoStyle(photoId, patch) {
+  _setPhotoStyle(state.schema, photoId, patch);
+  saveDraft();
+  notify();
+}
+
+// Issue 15: move a photo up/down the stack (also its visual "above/below" order).
+export function reorderPhoto(photoId, direction) {
+  _reorderPhoto(state.schema, photoId, direction);
+  saveDraft();
+  notify();
+}
+
+// Issue 2: "Start over" — wipes the saved draft and the in-progress
+// form/schema for this template, restoring it to the pristine version the
+// gallery hands out, WITHOUT leaving the builder (so the person doesn't
+// have to re-pick the template from the gallery).
+export function restartCurrentTemplate(rawSchema) {
+  if (!state.templateId) return;
+  clearDraft(state.templateId);
+  state.schema = cloneSchema(rawSchema);
+  state.formData = emptyFormData(state.schema);
+  state.email = "";
+  state.fullName = "";
+  notify();
 }

@@ -17,8 +17,8 @@ function bar(title, innerHtml) {
     </div>`;
 }
 
-export function render(formData) {
-  const [profile, personal, qualification, family, address] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, personal, qualification, family, address] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

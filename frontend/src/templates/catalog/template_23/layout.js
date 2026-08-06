@@ -9,8 +9,8 @@ function line(label, value) {
   return `<div class="bd23-line"><span class="bd23-label">${esc(label)}:</span> <span class="bd23-value">${value && value.trim() ? esc(value) : "&nbsp;"}</span></div>`;
 }
 
-export function render(formData) {
-  const [profile, contact, personal, family] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, contact, personal, family] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

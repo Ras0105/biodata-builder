@@ -37,8 +37,8 @@ function highlightRow(formData, section, icon) {
     </div>`;
 }
 
-export function render(formData) {
-  const [profile, personalHighlight, familyHighlight, careerHighlight, beliefsHighlight, declaration, contact] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, personalHighlight, familyHighlight, careerHighlight, beliefsHighlight, declaration, contact] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
   const nameParts = (formData.fullName || "").trim().split(/\s+/);
   const firstName = nameParts[0] || "";

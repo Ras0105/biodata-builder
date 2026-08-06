@@ -13,8 +13,8 @@ function groupTitle(title) {
   return `<h3 class="bd22-group-title">${esc(title)}</h3>`;
 }
 
-export function render(formData) {
-  const [profile, personal, family, qualification, contact] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, personal, family, qualification, contact] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

@@ -24,8 +24,8 @@ function paragraph(value) {
   return `<p class="bd13-paragraph">${value && value.trim() ? esc(value) : "&nbsp;"}</p>`;
 }
 
-export function render(formData) {
-  const [personal, family, expectations, contact] = schema.sections;
+export function render(formData, liveSchema) {
+  const [personal, family, expectations, contact] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

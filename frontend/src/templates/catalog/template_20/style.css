@@ -9,7 +9,7 @@
   box-sizing: border-box;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: #2c2620;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template20 .bd20-header {

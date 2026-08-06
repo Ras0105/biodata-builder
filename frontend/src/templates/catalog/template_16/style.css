@@ -11,7 +11,7 @@
   box-sizing: border-box;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: #2b2320;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template16 .bd16-sidebar {

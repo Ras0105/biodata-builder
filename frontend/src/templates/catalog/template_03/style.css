@@ -10,7 +10,7 @@
   box-sizing: border-box;
   font-family: "Georgia", "Times New Roman", serif;
   color: #f3e6c8;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template03 .bd03-border-top,

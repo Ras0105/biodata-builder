@@ -19,6 +19,31 @@ body {
 .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
 
 /* ---- Gallery ---- */
+.gallery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.filter-chip {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #d5d2ca;
+  background: #fff;
+  color: #4a4438;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.filter-chip:hover { border-color: #b3a892; background: #f6f3ec; }
+.filter-chip.active {
+  background: #1f1c1a;
+  border-color: #1f1c1a;
+  color: #fff;
+}
+.gallery-empty { color: #888; font-size: 14px; padding: 20px 0; }
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -335,4 +360,69 @@ body {
   .bd-cont-page {
     page-break-before: always;
   }
+}
+
+/* --- Issue 2: Start over button --- */
+.btn-danger-outline {
+  border-color: #b3402a;
+  color: #b3402a;
+}
+.btn-danger-outline:hover { background: #fff5f0; }
+
+/* --- Issue 4, 15 & 16: per-photo style panel + reorder controls --- */
+.photo-style-panel {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.photo-style-panel summary {
+  cursor: pointer;
+  color: #6b5f4f;
+  font-weight: 600;
+}
+.photo-style-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+.photo-style-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: #8a8070;
+}
+.photo-style-grid select,
+.photo-style-grid input[type="color"],
+.photo-style-grid input[type="range"] {
+  font-family: inherit;
+  font-size: 13px;
+}
+.photo-style-grid input[type="color"] {
+  padding: 0;
+  height: 26px;
+  border: 1px solid #d5d2ca;
+  border-radius: 4px;
+  background: none;
+}
+.photo-reorder {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* --- Issue 7 & 14: never silently lose long text off the edge of a page.
+   Applies across every template's own stylesheet, whatever its class names,
+   because it targets the shared root wrapper every layout.js/dynamicExtras
+   output uses (.bd-template*, .bd-cont-page) rather than any one template's
+   internal class names. --- */
+.bd-template,
+.bd-cont-page {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.bd-template *,
+.bd-cont-page * {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }

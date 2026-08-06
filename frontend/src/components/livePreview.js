@@ -200,7 +200,11 @@ export async function renderPreview(container, templateId, schema, formData, cal
 
   let baseHtml;
   try {
-    baseHtml = render(formData);
+    // Issue 6: pass the LIVE (possibly mutated) schema, not just formData —
+    // every template's render() now prefers this over its own frozen import
+    // so a field added to (or removed from) a pre-built section shows up
+    // immediately instead of only ever reflecting the template's original shape.
+    baseHtml = render(formData, schema);
   } catch (err) {
     console.error("Template render failed:", err);
     baseHtml = `<div class="bd-render-error">This template's preview couldn't render with the current sections removed. Try restoring the removed section, or check the Print/Download output.</div>`;

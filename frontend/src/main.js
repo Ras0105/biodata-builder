@@ -1,12 +1,14 @@
-import { getTemplateMeta } from "./templates/registry.js";
+import { getTemplateMeta, getCategories } from "./templates/registry.js";
 import { renderGallery } from "./components/templateGallery.js";
 import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
+import { calculateAge } from "./templates/schemaUtils.js";
 import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
   addPage, removePage, addPhoto, removePhoto, movePhoto, positionPhoto,
+  setPhotoStyle, reorderPhoto, restartCurrentTemplate,
 } from "./state.js";
 
 const viewGallery = document.getElementById("view-gallery");
@@ -15,6 +17,7 @@ const galleryGrid = document.getElementById("galleryGrid");
 const formMount = document.getElementById("formMount");
 const previewMount = document.getElementById("previewMount");
 const backBtn = document.getElementById("backBtn");
+const restartBtn = document.getElementById("restartBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const fullNameInput = document.getElementById("f_fullName");
 const emailInput = document.getElementById("f_email");
@@ -55,6 +58,8 @@ const formCallbacks = {
   onAddPhoto: () => { addPhoto(); rerenderAll(); },
   onRemovePhoto: (photoId) => { removePhoto(photoId); rerenderAll(); },
   onMovePhoto: (photoId, pageId) => { movePhoto(photoId, pageId); rerenderAll(); },
+  onPhotoStyle: (photoId, patch) => { setPhotoStyle(photoId, patch); rerenderAll(); },
+  onReorderPhoto: (photoId, direction) => { reorderPhoto(photoId, direction); rerenderAll(); },
   // Drag/resize on the preview: persist only, no re-render (avoids flicker —
   // the preview DOM already reflects the new position live during the drag).
   onPhotoPosition: (photoId, pos) => { positionPhoto(photoId, pos); },
@@ -84,6 +89,20 @@ backBtn.addEventListener("click", () => {
   history.pushState(null, "", location.pathname);
 });
 
+// Issue 2: Start over — clears the draft and restores this template to its
+// pristine, un-edited state without leaving the builder.
+restartBtn.addEventListener("click", async () => {
+  if (!state.templateId) return;
+  if (!confirm("Start over? This clears everything you've entered for this biodata.")) return;
+  const meta = getTemplateMeta(state.templateId);
+  const { schema } = await meta.loadSchema();
+  restartCurrentTemplate(schema);
+  fullNameInput.value = "";
+  emailInput.value = "";
+  renderForm(formMount, state.schema, state.formData, formCallbacks);
+  await renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
+});
+
 subscribe(() => {});
 
 downloadBtn.addEventListener("click", () => {
@@ -91,6 +110,19 @@ downloadBtn.addEventListener("click", () => {
   if (missing.length) {
     overlay.fail(`Please fill in: ${missing.join(", ")}`);
     return;
+  }
+
+  // Issue 13: age gate — only Marriage-category biodatas require 18+, and
+  // only when we can actually read a DOB (every template's schema uses the
+  // same "dob" field id, see schema.js files). General/non-marriage
+  // templates are unrestricted.
+  const isMarriageTemplate = getCategories(getTemplateMeta(state.templateId)).includes("Marriage");
+  if (isMarriageTemplate) {
+    const age = calculateAge(state.formData.dob);
+    if (age !== null && age < 18) {
+      overlay.fail("This is a marriage biodata template, and the date of birth entered shows an age under 18. Only users aged 18 and above can create a marriage biodata.");
+      return;
+    }
   }
 
   startCheckout(

@@ -111,6 +111,10 @@ export function removeField(schema, pageId, sectionId, fieldId) {
   const page = schema.pages.find((p) => p.id === pageId);
   const section = page?.sections.find((s) => s.id === sectionId);
   if (!section) return;
+  const field = section.fields.find((f) => f.id === fieldId);
+  // Issue 11: required fields can never be removed, custom or pre-built —
+  // only edited. Everything else (pre-built or custom) is removable.
+  if (!field || field.required) return;
   section.fields = section.fields.filter((f) => f.id !== fieldId);
 }
 
@@ -152,6 +156,11 @@ export function addPhoto(schema, label) {
     y: 40 + row * 150,
     w: 120,
     h: 120,
+    // Styling (issues 4 & 16): border + filter, editable per-photo.
+    borderStyle: "solid", // solid | dashed | dotted | double | none
+    borderWidth: 3,
+    borderColor: null, // null = inherit the template's theme accent color
+    filter: "none", // none | grayscale | sepia | vintage | cool | soft
   };
   schema.photos.push(photo);
   return photo.id;
@@ -180,4 +189,39 @@ export function positionPhoto(schema, photoId, { x, y, w, h }) {
   if (y != null) photo.y = Math.max(0, y);
   if (w != null) photo.w = Math.max(50, w);
   if (h != null) photo.h = Math.max(50, h);
+}
+
+// Issue 4 & 16: shape/border/filter styling, per extra photo.
+export function setPhotoStyle(schema, photoId, patch) {
+  const photo = schema.photos.find((p) => p.id === photoId);
+  if (!photo || photo.required) return;
+  ["shape", "borderStyle", "borderWidth", "borderColor", "filter"].forEach((key) => {
+    if (key in patch) photo[key] = patch[key];
+  });
+}
+
+// Issue 15: re-order extra (non-primary) photos, which also controls their
+// stacking order in the live preview overlay (later in the array = drawn on
+// top), so the user can decide which photo sits "above" another.
+export function reorderPhoto(schema, photoId, direction) {
+  const idx = schema.photos.findIndex((p) => p.id === photoId);
+  if (idx <= 0) return; // primary photo (index 0) is never reorderable
+  const swapWith = direction === "up" ? idx - 1 : idx + 1;
+  if (swapWith <= 0 || swapWith >= schema.photos.length) return;
+  const tmp = schema.photos[idx];
+  schema.photos[idx] = schema.photos[swapWith];
+  schema.photos[swapWith] = tmp;
+}
+
+// Issue 13: age gate for marriage-category biodatas. Returns null if it
+// cannot be determined (no/invalid DOB), otherwise the age in whole years.
+export function calculateAge(dobString) {
+  if (!dobString) return null;
+  const dob = new Date(dobString);
+  if (Number.isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age -= 1;
+  return age;
 }

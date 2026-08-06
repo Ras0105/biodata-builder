@@ -19,8 +19,8 @@ function card(title, innerHtml) {
     </div>`;
 }
 
-export function render(formData) {
-  const [profile, overview, aboutMe, family, beliefs, expectations] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, overview, aboutMe, family, beliefs, expectations] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
 
   return `

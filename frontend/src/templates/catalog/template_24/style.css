@@ -10,7 +10,7 @@
   box-sizing: border-box;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: #2f2626;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template24 .bd24-photo-col {

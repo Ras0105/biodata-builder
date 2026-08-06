@@ -9,7 +9,7 @@
   box-sizing: border-box;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: #3a2f2f;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template23 .bd23-header {

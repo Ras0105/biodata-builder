@@ -9,7 +9,7 @@
   box-sizing: border-box;
   font-family: Georgia, "Times New Roman", serif;
   color: #3a2b2b;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bd-template22 .bd22-flourish {

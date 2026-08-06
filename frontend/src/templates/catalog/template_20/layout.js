@@ -19,8 +19,8 @@ function sectionBlock(section, formData) {
     </div>`;
 }
 
-export function render(formData) {
-  const [profile, contact, personal, education, parents, mosal] = schema.sections;
+export function render(formData, liveSchema) {
+  const [profile, contact, personal, education, parents, mosal] = (liveSchema || schema).sections;
   const photoSrc = formData.photo || "";
   const eduLines = [formData.eduLine1, formData.eduLine2, formData.eduLine3].filter((v) => v && v.trim());
 

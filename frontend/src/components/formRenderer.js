@@ -97,10 +97,25 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
       </select>`
         : "";
 
+    // Issue 4, 15 & 16: extra photos (idx > 0) get shape/border/filter
+    // controls and up/down ordering (which also controls stacking order —
+    // "above/below" — since dynamicExtras draws later photos on top).
+    const styleHtml = idx > 0 ? photoStyleControlsHtml(photo) : "";
+    const reorderHtml =
+      idx > 0
+        ? `
+      <div class="photo-reorder">
+        <button type="button" class="btn-link" data-reorder-photo="${photo.id}" data-dir="up" title="Bring above the photo below it">&#8593; Move up</button>
+        <button type="button" class="btn-link" data-reorder-photo="${photo.id}" data-dir="down" title="Send below the photo above it">&#8595; Move down</button>
+      </div>`
+        : "";
+
     photoBlock.innerHTML = `
       <label>${escAttr(photo.label)}${photo.required ? " *" : ""}${idx === 0 ? " (main)" : ""}</label>
       <input type="file" accept="image/*" data-field="${photo.id}" data-photo="true" />
       ${placementHtml}
+      ${styleHtml}
+      ${reorderHtml}
       ${removeBtn}
     `;
     photoBlock.querySelector("input").addEventListener("change", (e) => {
@@ -114,6 +129,10 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
     if (removeEl) removeEl.addEventListener("click", () => callbacks.onRemovePhoto(photo.id));
     const moveEl = photoBlock.querySelector("[data-move-photo]");
     if (moveEl) moveEl.addEventListener("change", (e) => callbacks.onMovePhoto(photo.id, e.target.value));
+    wirePhotoStyleControls(photoBlock, photo, callbacks);
+    photoBlock.querySelectorAll("[data-reorder-photo]").forEach((btn) => {
+      btn.addEventListener("click", () => callbacks.onReorderPhoto(photo.id, btn.dataset.dir));
+    });
 
     wrap.appendChild(photoBlock);
   });
@@ -128,6 +147,71 @@ function renderPhotosBlock(container, schema, formData, callbacks) {
   }
 
   container.appendChild(wrap);
+}
+
+// Issue 4 & 16: Canva-style photo styling — shape, border style/width/color,
+// filter — for extra (non-primary) photos. Kept collapsed by default so it
+// doesn't overwhelm the form; opens on demand.
+const SHAPES = [
+  ["square", "Square"],
+  ["circle", "Circle"],
+  ["rect", "Rounded"],
+];
+const BORDER_STYLES = [
+  ["solid", "Solid"],
+  ["dashed", "Dashed"],
+  ["dotted", "Dotted"],
+  ["double", "Double"],
+  ["none", "None"],
+];
+const FILTERS = [
+  ["none", "None"],
+  ["grayscale", "Grayscale"],
+  ["sepia", "Sepia"],
+  ["vintage", "Vintage"],
+  ["cool", "Cool"],
+  ["soft", "Soft"],
+];
+
+function photoStyleControlsHtml(photo) {
+  return `
+    <details class="photo-style-panel">
+      <summary>Style this photo (shape, border, filter)</summary>
+      <div class="photo-style-grid">
+        <label>Shape
+          <select data-style-photo="${photo.id}" data-style-key="shape">
+            ${SHAPES.map(([v, l]) => `<option value="${v}" ${photo.shape === v ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+        </label>
+        <label>Border
+          <select data-style-photo="${photo.id}" data-style-key="borderStyle">
+            ${BORDER_STYLES.map(([v, l]) => `<option value="${v}" ${photo.borderStyle === v ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+        </label>
+        <label>Border width
+          <input type="range" min="0" max="10" step="1" data-style-photo="${photo.id}" data-style-key="borderWidth" value="${photo.borderWidth ?? 3}" />
+        </label>
+        <label>Border color
+          <input type="color" data-style-photo="${photo.id}" data-style-key="borderColor" value="${photo.borderColor || "#555555"}" />
+        </label>
+        <label>Filter
+          <select data-style-photo="${photo.id}" data-style-key="filter">
+            ${FILTERS.map(([v, l]) => `<option value="${v}" ${photo.filter === v ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+        </label>
+      </div>
+    </details>`;
+}
+
+function wirePhotoStyleControls(photoBlock, photo, callbacks) {
+  photoBlock.querySelectorAll("[data-style-photo]").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const key = e.target.dataset.styleKey;
+      let value = e.target.value;
+      if (key === "borderWidth") value = Number(value);
+      callbacks.onPhotoStyle(photo.id, { [key]: value });
+    });
+  });
 }
 
 function renderSection(pageId, section, formData, callbacks) {
@@ -174,8 +258,13 @@ function renderSection(pageId, section, formData, callbacks) {
 function renderField(pageId, section, field, formData, callbacks) {
   const fieldEl = document.createElement("div");
   fieldEl.className = "form-field";
-  const removeFieldHtml = field.custom
-    ? `<button type="button" class="btn-link btn-danger btn-remove-field" data-remove-field="${field.id}">✕</button>`
+  // Issue 11: any non-required field can be removed (pre-built or custom) —
+  // only required fields are locked to edit-only. Pre-built fields can never
+  // be removed AS a definition, only their value cleared, but hiding them
+  // from the biodata (what this button does) covers "I don't want to share
+  // my age" without letting the section itself get corrupted.
+  const removeFieldHtml = !field.required
+    ? `<button type="button" class="btn-link btn-danger btn-remove-field" data-remove-field="${field.id}" title="Remove this field from your biodata">✕</button>`
     : "";
   const labelHtml = `<label for="f_${field.id}">${escAttr(field.label)}${field.required ? " *" : ""}</label>${removeFieldHtml}`;
 

@@ -17,9 +17,9 @@ function row(label, value) {
     </div>`;
 }
 
-export function render(formData) {
-  const personal = schema.sections[0];
-  const family = schema.sections[1];
+export function render(formData, liveSchema) {
+  const personal = (liveSchema || schema).sections[0];
+  const family = (liveSchema || schema).sections[1];
 
   const photoSrc = formData.photo || "";
 
