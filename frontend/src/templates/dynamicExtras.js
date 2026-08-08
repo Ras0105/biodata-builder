@@ -74,6 +74,46 @@ function photoFilterCss(filter) {
   }
 }
 
+// Canva-style on-photo edit menu: shape / border / filter / stacking /
+// remove, all attached directly to the photo instead of living in the form.
+// Exported so livePreview.js can read the same option lists when wiring inputs.
+export const PHOTO_SHAPES = [["square", "Square"], ["circle", "Circle"], ["rect", "Rounded"]];
+export const PHOTO_BORDER_STYLES = [["solid", "Solid"], ["dashed", "Dashed"], ["dotted", "Dotted"], ["double", "Double"], ["none", "None"]];
+export const PHOTO_FILTERS = [["none", "None"], ["grayscale", "Grayscale"], ["sepia", "Sepia"], ["vintage", "Vintage"], ["cool", "Cool"], ["soft", "Soft"]];
+
+function photoEditPanelHtml(theme, photo) {
+  const bColor = photo.borderColor || theme.accent;
+  return `
+    <div class="bd-photo-edit-panel" data-photo-panel="${photo.id}" hidden>
+      <div class="bd-panel-title">Style photo</div>
+      <label>Shape
+        <select data-style-photo="${photo.id}" data-style-key="shape">
+          ${PHOTO_SHAPES.map(([v, l]) => `<option value="${v}" ${photo.shape === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </label>
+      <label>Border
+        <select data-style-photo="${photo.id}" data-style-key="borderStyle">
+          ${PHOTO_BORDER_STYLES.map(([v, l]) => `<option value="${v}" ${(photo.borderStyle || "solid") === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </label>
+      <label>Border width
+        <input type="range" min="0" max="10" step="1" data-style-photo="${photo.id}" data-style-key="borderWidth" value="${photo.borderWidth ?? 3}" />
+      </label>
+      <label>Border color
+        <input type="color" data-style-photo="${photo.id}" data-style-key="borderColor" value="${bColor}" />
+      </label>
+      <label>Filter
+        <select data-style-photo="${photo.id}" data-style-key="filter">
+          ${PHOTO_FILTERS.map(([v, l]) => `<option value="${v}" ${(photo.filter || "none") === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </label>
+      <div class="bd-photo-edit-actions">
+        <button type="button" data-photo-front="${photo.id}">&#8593; Bring to front</button>
+        <button type="button" class="btn-danger" data-photo-remove="${photo.id}">Remove photo</button>
+      </div>
+    </div>`;
+}
+
 // Freeform, draggable/resizable photo overlay. `position:absolute` takes it
 // completely out of the template's document flow (so it can never disturb a
 // grid/flex layout and can never "escape" the page — it's always positioned
@@ -104,6 +144,8 @@ function photoOverlayHtml(theme, photo, formData) {
     ">
       ${inner}
       <div class="bd-user-photo-resize" data-photo-resize="${photo.id}"></div>
+      <button type="button" class="bd-photo-edit-btn" data-photo-edit="${photo.id}" title="Edit photo">&#9998;</button>
+      ${photoEditPanelHtml(theme, photo)}
     </div>`;
 }
 

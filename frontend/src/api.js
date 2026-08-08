@@ -4,13 +4,14 @@
 
 const API_BASE = window.BIODATA_API_BASE || "";
 
-export async function createOrder({ email, fullName, community, templateId, formData, amountPaise, currency }) {
+export async function createOrder({ email, fullName, phone, community, templateId, formData, amountPaise, currency }) {
   const res = await fetch(`${API_BASE}/api/create-order`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       customer_email: email,
       customer_name: fullName,
+      customer_phone: phone,
       community,
       template_id: templateId,
       form_data: formData,

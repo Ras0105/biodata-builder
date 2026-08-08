@@ -7,9 +7,10 @@ import { createOrder, pollOrderStatus } from "../api.js";
 const AMOUNT_PAISE = window.BIODATA_AMOUNT_PAISE || 1900; // ₹19, adjust to your real price
 const CURRENCY = "INR";
 
-export async function startCheckout({ email, fullName, community, templateId, formData }, overlay) {
+export async function startCheckout({ email, fullName, phone, community, templateId, formData }, overlay) {
   if (!email) return overlay.fail("Please add your email before downloading.");
   if (!fullName) return overlay.fail("Please add your name before downloading.");
+  if (!phone) return overlay.fail("Please add your phone number before downloading.");
 
   overlay.show("Preparing your order…");
 
@@ -18,6 +19,7 @@ export async function startCheckout({ email, fullName, community, templateId, fo
     order = await createOrder({
       email,
       fullName,
+      phone,
       community,
       templateId,
       formData,
@@ -37,7 +39,7 @@ export async function startCheckout({ email, fullName, community, templateId, fo
     currency: order.currency,
     name: "BiodataDraft",
     description: "Marriage biodata PDF download",
-    prefill: { name: fullName, email },
+    prefill: { name: fullName, email, contact: phone },
     handler: function () {
       overlay.show("Payment received. Generating your biodata…");
       pollOrderStatus(order.order_id)

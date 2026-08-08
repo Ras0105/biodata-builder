@@ -54,6 +54,7 @@ export function renderGallery(container, onSelect) {
       </div>
     `;
     card.querySelector("button").addEventListener("click", () => onSelect(meta.id));
+    card.querySelector(".template-card-thumb").addEventListener("click", () => onSelect(meta.id));
     grid.appendChild(card);
   });
 

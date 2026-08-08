@@ -13,6 +13,13 @@ import { renderExtras } from "../templates/dynamicExtras.js";
 let currentStyleEl = null;
 const PAGE_WIDTH = 735; // matches the fixed template page width used across the catalog
 
+// Issue 6: which extra photo's Canva-style edit panel is currently open.
+// Every style/border/filter change re-renders the whole page's HTML (see
+// renderPreview -> showPage), which would otherwise wipe out an open panel
+// on every keystroke/slider drag. Tracking it here and re-applying it after
+// each render is what makes the panel "not close automatically".
+let openPhotoPanelId = null;
+
 // Remembers current page + last rendered pages/scale, so arrow/dot clicks
 // and photo drags can act instantly without recomputing template HTML.
 const nav = {
@@ -75,6 +82,13 @@ function getNavEls() {
 function wirePhotoInteractions(container) {
   if (!nav.schema) return;
 
+  // Restore whichever photo's edit panel was open before this re-render.
+  if (openPhotoPanelId) {
+    const panel = container.querySelector(`[data-photo-panel="${openPhotoPanelId}"]`);
+    if (panel) panel.hidden = false;
+    else openPhotoPanelId = null; // that photo no longer exists (e.g. removed)
+  }
+
   container.querySelectorAll("[data-photo-drag]").forEach((el) => {
     const photoId = el.dataset.photoDrag;
     let mode = null; // "drag" | "resize"
@@ -91,6 +105,10 @@ function wirePhotoInteractions(container) {
     };
 
     el.addEventListener("pointerdown", (e) => {
+      // Don't start a drag when the pointer is on the edit icon or inside
+      // the open style panel (clicking a select/slider there shouldn't move
+      // the photo underneath it).
+      if (e.target.closest("[data-photo-edit], .bd-photo-edit-panel")) return;
       mode = "drag";
       el.setPointerCapture(e.pointerId);
       startX = e.clientX;
@@ -147,6 +165,60 @@ function wirePhotoInteractions(container) {
     };
     handle.addEventListener("pointerup", endResize);
     handle.addEventListener("pointercancel", endResize);
+  });
+
+  wirePhotoEditPanels(container);
+}
+
+// Issue 6: the Canva-style edit icon + its style/border/filter/order/remove
+// panel, attached directly to each extra photo in the live preview.
+function wirePhotoEditPanels(container) {
+  container.querySelectorAll("[data-photo-edit]").forEach((btn) => {
+    const photoId = btn.dataset.photoEdit;
+    // Stop the click from also being read as a drag-start on the parent photo.
+    btn.addEventListener("pointerdown", (e) => e.stopPropagation());
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openPhotoPanelId = openPhotoPanelId === photoId ? null : photoId;
+      container.querySelectorAll("[data-photo-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.photoPanel !== openPhotoPanelId;
+      });
+    });
+  });
+
+  container.querySelectorAll(".bd-photo-edit-panel").forEach((panel) => {
+    // Keep any interaction inside the panel (typing, dragging a slider,
+    // clicking a select) from bubbling up and starting a photo drag.
+    panel.addEventListener("pointerdown", (e) => e.stopPropagation());
+    panel.addEventListener("click", (e) => e.stopPropagation());
+  });
+
+  container.querySelectorAll("[data-style-photo]").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const photoId = e.target.dataset.stylePhoto;
+      const key = e.target.dataset.styleKey;
+      let value = e.target.value;
+      if (key === "borderWidth") value = Number(value);
+      openPhotoPanelId = photoId; // stays open through the re-render this triggers
+      nav.callbacks?.onPhotoStyle?.(photoId, { [key]: value });
+    });
+  });
+
+  container.querySelectorAll("[data-photo-front]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const photoId = btn.dataset.photoFront;
+      openPhotoPanelId = photoId;
+      nav.callbacks?.onPhotoToFront?.(photoId);
+    });
+  });
+
+  container.querySelectorAll("[data-photo-remove]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const photoId = btn.dataset.photoRemove;
+      if (!confirm("Remove this photo?")) return;
+      openPhotoPanelId = null;
+      nav.callbacks?.onRemovePhoto?.(photoId);
+    });
   });
 }
 
@@ -217,6 +289,7 @@ export async function renderPreview(container, templateId, schema, formData, cal
   wireNavOnce();
 
   const isTemplateSwitch = nav.templateId !== templateId;
+  if (isTemplateSwitch) openPhotoPanelId = null;
   nav.templateId = templateId;
   nav.pagesHtml = pagesHtml;
   nav.container = container;

@@ -21,6 +21,47 @@ const restartBtn = document.getElementById("restartBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const fullNameInput = document.getElementById("f_fullName");
 const emailInput = document.getElementById("f_email");
+const phoneInput = document.getElementById("f_phone");
+const countryCodeSelect = document.getElementById("f_countryCode");
+const phoneErrorEl = document.getElementById("phoneError");
+
+// Issue 7: phone number with country code, defaulting to India.
+const COUNTRY_CODES = [
+  ["+91", "India (+91)", 10],
+  ["+1", "USA/Canada (+1)", 10],
+  ["+44", "UK (+44)", 10],
+  ["+61", "Australia (+61)", 9],
+  ["+971", "UAE (+971)", 9],
+  ["+966", "Saudi Arabia (+966)", 9],
+  ["+974", "Qatar (+974)", 8],
+  ["+965", "Kuwait (+965)", 8],
+  ["+968", "Oman (+968)", 8],
+  ["+973", "Bahrain (+973)", 8],
+  ["+92", "Pakistan (+92)", 10],
+  ["+880", "Bangladesh (+880)", 10],
+  ["+977", "Nepal (+977)", 10],
+  ["+94", "Sri Lanka (+94)", 9],
+  ["+65", "Singapore (+65)", 8],
+];
+countryCodeSelect.innerHTML = COUNTRY_CODES
+  .map(([code, label]) => `<option value="${code}">${label}</option>`)
+  .join("");
+countryCodeSelect.value = "+91"; // default India
+
+function expectedPhoneLength(code) {
+  const found = COUNTRY_CODES.find(([c]) => c === code);
+  return found ? found[2] : 10;
+}
+
+function validatePhone({ showError = true } = {}) {
+  const digits = phoneInput.value.replace(/\D/g, "");
+  const expectedLen = expectedPhoneLength(countryCodeSelect.value);
+  const valid = digits.length === expectedLen;
+  if (showError) {
+    phoneErrorEl.textContent = valid || !digits ? "" : `Enter a valid ${expectedLen}-digit number for ${countryCodeSelect.value}.`;
+  }
+  return valid;
+}
 
 const overlayEl = document.getElementById("overlay");
 const overlayTextEl = document.getElementById("overlayText");
@@ -38,8 +79,17 @@ function showView() {
 // Re-renders both the form panel and the live preview from current state.
 // Used after any structural change (add/remove section, page, photo, field)
 // since those change what the form and preview both need to display.
+// Issue 7: age gate is only relevant on Marriage-category templates, and only
+// business logic that lives in main.js — formRenderer.js stays generic and
+// just renders whatever { fieldId, minAge } it's handed.
+function getAgeGate() {
+  if (!state.templateId) return null;
+  const isMarriageTemplate = getCategories(getTemplateMeta(state.templateId)).includes("Marriage");
+  return isMarriageTemplate ? { fieldId: "dob", minAge: 18 } : null;
+}
+
 function rerenderAll() {
-  renderForm(formMount, state.schema, state.formData, formCallbacks);
+  renderForm(formMount, state.schema, state.formData, formCallbacks, { ageGate: getAgeGate() });
   renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
 }
 
@@ -73,15 +123,29 @@ async function onSelectTemplate(templateId, { updateHash = true } = {}) {
 
   fullNameInput.value = state.fullName;
   emailInput.value = state.email;
+  phoneInput.value = state.phone || "";
+  countryCodeSelect.value = state.countryCode || "+91";
+  phoneErrorEl.textContent = "";
 
   if (updateHash) location.hash = `#/${templateId}`;
 
-  renderForm(formMount, state.schema, state.formData, formCallbacks);
+  renderForm(formMount, state.schema, state.formData, formCallbacks, { ageGate: getAgeGate() });
   await renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
 }
 
 fullNameInput.addEventListener("input", (e) => { state.fullName = e.target.value; saveDraft(); });
 emailInput.addEventListener("input", (e) => { state.email = e.target.value; saveDraft(); });
+phoneInput.addEventListener("input", (e) => {
+  e.target.value = e.target.value.replace(/\D/g, "");
+  state.phone = e.target.value;
+  saveDraft();
+  validatePhone();
+});
+countryCodeSelect.addEventListener("change", (e) => {
+  state.countryCode = e.target.value;
+  saveDraft();
+  validatePhone();
+});
 
 backBtn.addEventListener("click", () => {
   backToGallery();
@@ -99,7 +163,10 @@ restartBtn.addEventListener("click", async () => {
   restartCurrentTemplate(schema);
   fullNameInput.value = "";
   emailInput.value = "";
-  renderForm(formMount, state.schema, state.formData, formCallbacks);
+  phoneInput.value = "";
+  countryCodeSelect.value = "+91";
+  phoneErrorEl.textContent = "";
+  renderForm(formMount, state.schema, state.formData, formCallbacks, { ageGate: getAgeGate() });
   await renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
 });
 
@@ -112,15 +179,19 @@ downloadBtn.addEventListener("click", () => {
     return;
   }
 
-  // Issue 13: age gate — only Marriage-category biodatas require 18+, and
-  // only when we can actually read a DOB (every template's schema uses the
-  // same "dob" field id, see schema.js files). General/non-marriage
-  // templates are unrestricted.
-  const isMarriageTemplate = getCategories(getTemplateMeta(state.templateId)).includes("Marriage");
-  if (isMarriageTemplate) {
-    const age = calculateAge(state.formData.dob);
-    if (age !== null && age < 18) {
-      overlay.fail("This is a marriage biodata template, and the date of birth entered shows an age under 18. Only users aged 18 and above can create a marriage biodata.");
+  if (!validatePhone()) {
+    overlay.fail(phoneInput.value ? phoneErrorEl.textContent || "Please enter a valid phone number." : "Please add your phone number before downloading.");
+    return;
+  }
+
+  // Age gate — only Marriage-category biodatas require 18+, and only when we
+  // can actually read a DOB (every template's schema uses the same "dob"
+  // field id, see schema.js files). General/non-marriage templates are unrestricted.
+  const ageGate = getAgeGate();
+  if (ageGate) {
+    const age = calculateAge(state.formData[ageGate.fieldId]);
+    if (age !== null && age < ageGate.minAge) {
+      overlay.fail(`This is a marriage biodata template, and the date of birth entered shows an age under ${ageGate.minAge}. Only users aged ${ageGate.minAge} and above can create a marriage biodata.`);
       return;
     }
   }
@@ -129,6 +200,7 @@ downloadBtn.addEventListener("click", () => {
     {
       email: state.email,
       fullName: state.fullName,
+      phone: `${state.countryCode || "+91"} ${state.phone || ""}`.trim(),
       community: getTemplateMeta(state.templateId).community,
       templateId: state.templateId,
       formData: state.formData,

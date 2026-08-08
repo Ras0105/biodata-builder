@@ -25,6 +25,8 @@ export const state = {
   formData: {},
   email: "",
   fullName: "",
+  phone: "",
+  countryCode: "+91",
 };
 
 const listeners = [];
@@ -57,6 +59,8 @@ export function saveDraft() {
         formData: state.formData,
         email: state.email,
         fullName: state.fullName,
+        phone: state.phone,
+        countryCode: state.countryCode,
         schema: { id: state.schema.id, photos: state.schema.photos, pages: state.schema.pages },
       })
     );
@@ -94,10 +98,14 @@ export function selectTemplate(templateId, rawSchema) {
     state.formData = { ...emptyFormData(state.schema), ...draft.formData };
     state.email = draft.email || "";
     state.fullName = draft.fullName || "";
+    state.phone = draft.phone || "";
+    state.countryCode = draft.countryCode || "+91";
   } else {
     state.formData = emptyFormData(state.schema);
     state.email = "";
     state.fullName = "";
+    state.phone = "";
+    state.countryCode = "+91";
   }
 
   state.view = "builder";
@@ -228,5 +236,7 @@ export function restartCurrentTemplate(rawSchema) {
   state.formData = emptyFormData(state.schema);
   state.email = "";
   state.fullName = "";
+  state.phone = "";
+  state.countryCode = "+91";
   notify();
 }

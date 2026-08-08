@@ -16,7 +16,7 @@ body {
 }
 .app-header .brand { font-size: 20px; font-weight: 700; letter-spacing: 0.02em; }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+.container { max-width: 1440px; margin: 0 auto; padding: 32px; }
 
 /* ---- Gallery ---- */
 .gallery-filters {
@@ -46,8 +46,9 @@ body {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 24px;
+  align-items: stretch;
 }
 .template-card {
   background: #fff;
@@ -56,22 +57,36 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  transition: box-shadow 0.15s, transform 0.15s;
 }
+.template-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); transform: translateY(-2px); }
 .template-card-thumb {
   aspect-ratio: 3 / 4;
   background: #eee;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
 }
-.template-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.template-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .template-card-thumb.no-thumb::after {
   content: "No preview yet";
   color: #999;
   font-size: 13px;
 }
-.template-card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-.template-card-name { font-size: 16px; font-weight: 700; }
+.template-card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.template-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  min-height: 40px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .template-card-community {
   display: inline-block;
   font-size: 12px;
@@ -80,39 +95,80 @@ body {
   padding: 2px 8px;
   border-radius: 12px;
   width: fit-content;
+  min-height: 20px;
 }
-.template-card-desc { font-size: 13px; color: #666; line-height: 1.4; min-height: 36px; }
+.template-card-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.template-card-body .btn-primary { margin-top: 10px; }
 
 /* ---- Builder ---- */
 .builder-layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 32px;
+  grid-template-columns: 460px 1fr;
+  gap: 36px;
   align-items: start;
 }
 .form-panel {
   background: #fff;
   border: 1px solid #e2e0da;
-  border-radius: 10px;
-  padding: 20px;
-  max-height: 82vh;
+  border-radius: 12px;
+  padding: 22px 24px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  max-height: calc(100vh - 40px);
   overflow-y: auto;
 }
-.form-section { border: none; padding: 0; margin: 0 0 22px; }
-.form-section legend { font-weight: 700; font-size: 14px; margin-bottom: 10px; padding: 0; }
-.form-field { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+.form-section {
+  border: 1px solid #ece8e0;
+  border-radius: 10px;
+  background: #fbfaf8;
+  padding: 16px 18px 18px;
+  margin: 0 0 18px;
+}
+.form-section legend { font-weight: 700; font-size: 14.5px; margin-bottom: 12px; padding: 0 2px; color: #2a2620; }
+.form-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.form-fields-grid .form-field-full { grid-column: 1 / -1; }
+.form-field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
 .form-field label { font-size: 13px; color: #444; }
 .form-field input,
 .form-field textarea {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid #d5d2ca;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
+  background: #fff;
+}
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: #8a5a2b;
+  box-shadow: 0 0 0 3px rgba(138, 90, 43, 0.12);
 }
 .form-field textarea { resize: vertical; min-height: 80px; }
 .preview-panel { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .preview-scale { transform-origin: top center; }
+
+/* ---- field hint (e.g. age validation) ---- */
+.field-hint { font-size: 12px; margin-top: 2px; min-height: 14px; }
+.field-hint.ok { color: #3b7a3b; }
+.field-hint.warn { color: #b23b3b; font-weight: 600; }
+
+/* ---- phone / country code group ---- */
+.phone-group { display: flex; gap: 8px; }
+.phone-group select { flex: 0 0 118px; padding: 10px 6px; border: 1px solid #d5d2ca; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+.phone-group input { flex: 1; min-width: 0; }
+.field-error { font-size: 12px; color: #b23b3b; margin-top: 4px; min-height: 14px; }
 
 /* ---- Canva-style page navigation (arrows + dots) ---- */
 .preview-nav {
@@ -171,7 +227,7 @@ body {
 }
 .overlay[hidden] { display: none; }
 
-.contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 
 /* ---- Responsive builder layout ---- */
 @media (max-width: 960px) {
@@ -183,10 +239,13 @@ body {
   }
 
   .form-panel {
+    position: static;
     max-height: none; /* no forced inner scroll on mobile */
     overflow-y: visible;
     padding: 16px;
   }
+
+  .form-fields-grid { grid-template-columns: 1fr; }
 
   .preview-panel {
     order: 2; /* form first, preview below on mobile */
@@ -341,9 +400,60 @@ body {
   touch-action: none;
 }
 
+/* --- Canva-style on-photo edit button + panel (shape/border/filter/order/remove) --- */
+.bd-photo-edit-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1f1c1a;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  touch-action: none;
+}
+.bd-photo-edit-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 200px;
+  background: #fff;
+  border: 1px solid #d5d2ca;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  z-index: 1002;
+  cursor: default;
+  font-size: 12px;
+  touch-action: auto;
+}
+.bd-photo-edit-panel[hidden] { display: none; }
+.bd-photo-edit-panel .bd-panel-title { font-weight: 700; font-size: 12px; margin-bottom: 8px; color: #2a2620; }
+.bd-photo-edit-panel label { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; color: #6b5f4f; font-size: 11px; }
+.bd-photo-edit-panel select { font-family: inherit; font-size: 12px; padding: 4px; border: 1px solid #d5d2ca; border-radius: 4px; }
+.bd-photo-edit-panel input[type="range"] { width: 100%; }
+.bd-photo-edit-panel input[type="color"] { padding: 0; height: 24px; border: 1px solid #d5d2ca; border-radius: 4px; background: none; width: 100%; }
+.bd-photo-edit-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 8px; }
+.bd-photo-edit-actions button {
+  text-align: left; background: none; border: none; padding: 0;
+  font-size: 12px; cursor: pointer; color: #6b5f4f; text-decoration: underline;
+}
+.bd-photo-edit-actions button.btn-danger { color: #b23b3b; }
+
 @media print {
   .bd-user-photo:hover { outline: none; }
   .bd-user-photo-resize { display: none; }
+  .bd-photo-edit-btn, .bd-photo-edit-panel { display: none !important; }
 }
 
 .bd-render-error {
@@ -362,59 +472,14 @@ body {
   }
 }
 
-/* --- Issue 2: Start over button --- */
+/* --- Start over button --- */
 .btn-danger-outline {
   border-color: #b3402a;
   color: #b3402a;
 }
 .btn-danger-outline:hover { background: #fff5f0; }
 
-/* --- Issue 4, 15 & 16: per-photo style panel + reorder controls --- */
-.photo-style-panel {
-  margin-top: 8px;
-  font-size: 12px;
-}
-.photo-style-panel summary {
-  cursor: pointer;
-  color: #6b5f4f;
-  font-weight: 600;
-}
-.photo-style-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 12px;
-  margin-top: 8px;
-}
-.photo-style-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 11px;
-  color: #8a8070;
-}
-.photo-style-grid select,
-.photo-style-grid input[type="color"],
-.photo-style-grid input[type="range"] {
-  font-family: inherit;
-  font-size: 13px;
-}
-.photo-style-grid input[type="color"] {
-  padding: 0;
-  height: 26px;
-  border: 1px solid #d5d2ca;
-  border-radius: 4px;
-  background: none;
-}
-.photo-to-front {
-  display: block;
-  margin-top: 6px;
-}
-
-/* --- Issue 7 & 14: never silently lose long text off the edge of a page.
-   Applies across every template's own stylesheet, whatever its class names,
-   because it targets the shared root wrapper every layout.js/dynamicExtras
-   output uses (.bd-template*, .bd-cont-page) rather than any one template's
-   internal class names. --- */
+/* --- never silently lose long text off the edge of a page --- */
 .bd-template,
 .bd-cont-page {
   overflow-wrap: break-word;
