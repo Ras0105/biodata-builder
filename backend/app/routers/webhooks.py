@@ -107,7 +107,12 @@ async def razorpay_webhook(
         return {"status": "order_not_found"}
 
     # ---- Only react to the events that mean "money has actually landed" ----
-    if event_type == "payment.captured" and order.status == OrderStatus.PENDING:
+    # Allow a captured payment to recover an order that a PRIOR failed
+    # attempt on this same order already marked FAILED — Razorpay lets a
+    # user retry within the same checkout session after a failed attempt,
+    # so "payment.failed" then "payment.captured" for the same order_id is
+    # a normal, expected sequence, not a data integrity problem.
+    if event_type == "payment.captured" and order.status in (OrderStatus.PENDING, OrderStatus.FAILED):
         order.status = OrderStatus.PAID
         order.razorpay_payment_id = payment_entity.get("id")
         order.paid_at = datetime.now(timezone.utc)
