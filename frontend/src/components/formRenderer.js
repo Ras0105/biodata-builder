@@ -232,6 +232,14 @@ function renderField(pageId, section, field, formData, callbacks, options = {}) 
   return fieldEl;
 }
 
+// Issue 1: two kinds of problems, both flagged inline as the user types —
+// (a) the date itself is nonsense (future DOB, or an age no living person
+// has) — checked regardless of template category — and (b) the marriage
+// 18+ rule, only when minAge > 0 (main.js only sets that for Marriage-
+// category templates). Both are re-checked by main.js before every
+// download anyway (see updateDownloadGate) — this hint is just the
+// live, as-you-type version of the same rule so the problem is visible
+// long before the user reaches the Download button.
 function updateAgeHint(hintEl, dobValue, minAge) {
   const age = calculateAge(dobValue);
   if (age === null) {
@@ -239,7 +247,13 @@ function updateAgeHint(hintEl, dobValue, minAge) {
     hintEl.className = "field-hint";
     return;
   }
-  if (age < minAge) {
+  if (age < 0) {
+    hintEl.textContent = `That date of birth is in the future — please correct it.`;
+    hintEl.className = "field-hint warn";
+  } else if (age > 120) {
+    hintEl.textContent = `That date of birth doesn't look right — please double-check it.`;
+    hintEl.className = "field-hint warn";
+  } else if (age < minAge) {
     hintEl.textContent = `Age is ${age}. Only ${minAge}+ is allowed for a marriage biodata.`;
     hintEl.className = "field-hint warn";
   } else {

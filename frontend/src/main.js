@@ -3,7 +3,8 @@ import { renderGallery } from "./components/templateGallery.js";
 import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
-import { calculateAge } from "./templates/schemaUtils.js";
+import { shareCurrentPreview } from "./components/sharePreview.js";
+import { calculateAge, findDobFieldId } from "./templates/schemaUtils.js";
 import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
@@ -19,6 +20,8 @@ const previewMount = document.getElementById("previewMount");
 const backBtn = document.getElementById("backBtn");
 const restartBtn = document.getElementById("restartBtn");
 const downloadBtn = document.getElementById("downloadBtn");
+const shareBtn = document.getElementById("shareBtn");
+const downloadBlockReasonEl = document.getElementById("downloadBlockReason");
 const fullNameInput = document.getElementById("f_fullName");
 const emailInput = document.getElementById("f_email");
 const phoneInput = document.getElementById("f_phone");
@@ -79,24 +82,58 @@ function showView() {
 // Re-renders both the form panel and the live preview from current state.
 // Used after any structural change (add/remove section, page, photo, field)
 // since those change what the form and preview both need to display.
-// Issue 7: age gate is only relevant on Marriage-category templates, and only
-// business logic that lives in main.js — formRenderer.js stays generic and
-// just renders whatever { fieldId, minAge } it's handed.
+// Issue 1 & 7: the DOB field is found generically (findDobFieldId) instead of
+// assuming every template calls it "dob" — two templates don't, and the old
+// hardcoded lookup meant their age gate silently never fired. The 18+ rule
+// itself is still only applied for Marriage-category templates; this stays
+// business logic in main.js — formRenderer.js remains generic and just
+// renders whatever { fieldId, minAge } it's handed.
 function getAgeGate() {
-  if (!state.templateId) return null;
+  if (!state.templateId || !state.schema) return null;
+  const fieldId = findDobFieldId(state.schema);
+  if (!fieldId) return null; // this template has no validatable DOB field (e.g. free-text only)
   const isMarriageTemplate = getCategories(getTemplateMeta(state.templateId)).includes("Marriage");
-  return isMarriageTemplate ? { fieldId: "dob", minAge: 18 } : null;
+  return { fieldId, minAge: isMarriageTemplate ? 18 : 0 };
+}
+
+// Issue 1: single source of truth for "is the entered age acceptable", used
+// both to disable the Download button live (as the user types) and as the
+// hard guard right before checkout starts. A future DOB or an implausible
+// age (>120) is rejected on every template, regardless of category; the
+// 18+ rule only applies when ageGate.minAge is set (Marriage templates).
+function checkAgeGate() {
+  const ageGate = getAgeGate();
+  if (!ageGate) return { ok: true };
+  const age = calculateAge(state.formData[ageGate.fieldId]);
+  if (age === null) return { ok: true }; // not filled in yet — required-field check handles that separately
+  if (age < 0) return { ok: false, reason: "Date of birth can't be in the future." };
+  if (age > 120) return { ok: false, reason: "Date of birth doesn't look right — please double-check it." };
+  if (age < ageGate.minAge) {
+    return { ok: false, reason: `Age is ${age}. Only ${ageGate.minAge}+ is allowed for a marriage biodata.` };
+  }
+  return { ok: true };
+}
+
+// Issue 1: keeps the Download button itself disabled — not just an alert
+// after the click — for as long as the entered age is invalid, so a wrong
+// age can never lead to checkout in the first place.
+function updateDownloadGate() {
+  const { ok, reason } = checkAgeGate();
+  downloadBtn.disabled = !ok;
+  downloadBlockReasonEl.textContent = ok ? "" : reason;
 }
 
 function rerenderAll() {
   renderForm(formMount, state.schema, state.formData, formCallbacks, { ageGate: getAgeGate() });
   renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
+  updateDownloadGate();
 }
 
 const formCallbacks = {
   onFieldChange: (fieldId, value) => {
     setField(fieldId, value);
     renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
+    updateDownloadGate();
   },
   onAddSection: (pageId, title) => { addSection(pageId, title); rerenderAll(); },
   onRemoveSection: (pageId, sectionId) => { removeSection(pageId, sectionId); rerenderAll(); },
@@ -110,6 +147,12 @@ const formCallbacks = {
   onMovePhoto: (photoId, pageId) => { movePhoto(photoId, pageId); rerenderAll(); },
   onPhotoStyle: (photoId, patch) => { setPhotoStyle(photoId, patch); rerenderAll(); },
   onPhotoToFront: (photoId) => { bringPhotoToFront(photoId); rerenderAll(); },
+  // Issue 2: same reorder, but called from pointerdown on the photo itself
+  // (click or drag-start) — no rerenderAll, because that would replace the
+  // preview's innerHTML mid-gesture and kill the drag (the pointerdown
+  // handler calls el.setPointerCapture() right after this). livePreview.js
+  // reorders the DOM element itself immediately for the same visual effect.
+  onPhotoToFrontSilent: (photoId) => { bringPhotoToFront(photoId); },
   // Drag/resize on the preview: persist only, no re-render (avoids flicker —
   // the preview DOM already reflects the new position live during the drag).
   onPhotoPosition: (photoId, pos) => { positionPhoto(photoId, pos); },
@@ -131,6 +174,7 @@ async function onSelectTemplate(templateId, { updateHash = true } = {}) {
 
   renderForm(formMount, state.schema, state.formData, formCallbacks, { ageGate: getAgeGate() });
   await renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
+  updateDownloadGate();
 }
 
 fullNameInput.addEventListener("input", (e) => { state.fullName = e.target.value; saveDraft(); });
@@ -168,9 +212,14 @@ restartBtn.addEventListener("click", async () => {
   phoneErrorEl.textContent = "";
   renderForm(formMount, state.schema, state.formData, formCallbacks, { ageGate: getAgeGate() });
   await renderPreview(previewMount, state.templateId, state.schema, state.formData, formCallbacks);
+  updateDownloadGate();
 });
 
 subscribe(() => {});
+
+shareBtn.addEventListener("click", () => {
+  shareCurrentPreview(previewMount, getTemplateMeta(state.templateId)?.name, overlay);
+});
 
 downloadBtn.addEventListener("click", () => {
   const missing = getMissingRequiredFields(state.schema, state.formData);
@@ -184,16 +233,13 @@ downloadBtn.addEventListener("click", () => {
     return;
   }
 
-  // Age gate — only Marriage-category biodatas require 18+, and only when we
-  // can actually read a DOB (every template's schema uses the same "dob"
-  // field id, see schema.js files). General/non-marriage templates are unrestricted.
-  const ageGate = getAgeGate();
-  if (ageGate) {
-    const age = calculateAge(state.formData[ageGate.fieldId]);
-    if (age !== null && age < ageGate.minAge) {
-      overlay.fail(`This is a marriage biodata template, and the date of birth entered shows an age under ${ageGate.minAge}. Only users aged ${ageGate.minAge} and above can create a marriage biodata.`);
-      return;
-    }
+  // Issue 1: same check that already keeps the button disabled — kept here
+  // too as a hard guard (belt-and-suspenders) in case this ever fires
+  // through something other than a direct click on an enabled button.
+  const { ok, reason } = checkAgeGate();
+  if (!ok) {
+    overlay.fail(reason);
+    return;
   }
 
   startCheckout(

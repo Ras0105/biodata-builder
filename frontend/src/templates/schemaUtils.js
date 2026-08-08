@@ -211,6 +211,25 @@ export function bringPhotoToFront(schema, photoId) {
   schema.photos.push(photo);
 }
 
+// Issue 1: finds whichever field IS this template's date-of-birth field,
+// without any template needing to name it "dob" specifically (template_11
+// and template_14 use Marathi/Sanskrit field ids, e.g. "janmaTarikh" — the
+// old hardcoded "dob" lookup silently found nothing for those two and the
+// age gate never fired). Every template's actual DOB field is its only
+// REQUIRED field of type "date" (a secondary optional date, like
+// template_08's Baptism Date, is never required) — so this is a safe,
+// generic rule that needs no per-template registration and keeps working
+// automatically as new templates are added.
+export function findDobFieldId(schema) {
+  for (const page of schema.pages) {
+    for (const section of page.sections) {
+      const match = section.fields.find((f) => f.type === "date" && f.required);
+      if (match) return match.id;
+    }
+  }
+  return null;
+}
+
 // Issue 13: age gate for marriage-category biodatas. Returns null if it
 // cannot be determined (no/invalid DOB), otherwise the age in whole years.
 export function calculateAge(dobString) {

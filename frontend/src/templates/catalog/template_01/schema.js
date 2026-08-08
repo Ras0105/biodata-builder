@@ -20,7 +20,7 @@ export const schema = {
             { id: "village", label: "Village", type: "text" },
             { id: "weight", label: "Weight", type: "text", placeholder: "e.g. 67 Kg" },
             { id: "height", label: "Height", type: "text", placeholder: "e.g. 5 ft. 7 in." },
-            { id: "education", label: "Education", type: "text", required: true },
+            { id: "education", label: "Education", type: "text" },
             { id: "profession", label: "Profession", type: "text" },
             { id: "salary", label: "Salary", type: "text", placeholder: "e.g. 3.7 LPA" },
             { id: "hobby", label: "Hobby", type: "text" },

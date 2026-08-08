@@ -6,6 +6,7 @@
 <title>Biodata Builder</title>
 <link rel="stylesheet" href="style.css" />
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <header class="app-header">
@@ -65,6 +66,8 @@
       </div>
 
       <div class="checkout-bar">
+        <div id="downloadBlockReason" class="field-error download-block-reason"></div>
+        <button type="button" id="shareBtn" class="btn btn-secondary">Share preview</button>
         <button type="button" id="downloadBtn" class="btn">Print / Download</button>
       </div>
     </section>

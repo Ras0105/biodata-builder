@@ -219,7 +219,9 @@ body {
 .btn-primary { width: 100%; margin-top: 10px; }
 
 .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.checkout-bar { margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px; }
+.checkout-bar { margin-top: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+.download-block-reason { margin-top: 0; text-align: right; max-width: 420px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; background: #7a766e; border-color: #7a766e; }
 
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);

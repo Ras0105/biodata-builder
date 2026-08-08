@@ -109,6 +109,14 @@ function wirePhotoInteractions(container) {
       // the open style panel (clicking a select/slider there shouldn't move
       // the photo underneath it).
       if (e.target.closest("[data-photo-edit], .bd-photo-edit-panel")) return;
+      // Issue 2: bring THIS photo to front the instant it's clicked or
+      // dragged, not only via the pencil-icon panel's "Bring to front"
+      // button. Reorders the schema (so the change persists across the next
+      // real render) and moves this element to be the last child of its
+      // layer right now (so it's visibly on top immediately, mid-gesture,
+      // without waiting for — or triggering — a full re-render).
+      nav.callbacks?.onPhotoToFrontSilent?.(photoId);
+      el.parentElement?.appendChild(el);
       mode = "drag";
       el.setPointerCapture(e.pointerId);
       startX = e.clientX;
@@ -168,6 +176,45 @@ function wirePhotoInteractions(container) {
   });
 
   wirePhotoEditPanels(container);
+  wirePrimaryPhotoUpload(container);
+}
+
+// Issue: clicking the primary photo, while it's still blank, should let the
+// user add one directly — not just via the separate file input in the form
+// panel. Every template's primary-photo EMPTY state renders with the class
+// pattern "bdNN-photo-placeholder" (verified across all 24 layout.js files
+// — the naming differs by template number, but the "-photo-placeholder"
+// suffix is identical everywhere), so this is one generic hook here, no
+// per-template edits needed. Once a photo is set, the element becomes a
+// plain <img> instead (no longer matches), so this stops applying —
+// re-uploading a new one is still available from the form panel.
+let hiddenPhotoInput = null;
+function ensureHiddenPhotoInput() {
+  if (hiddenPhotoInput) return hiddenPhotoInput;
+  hiddenPhotoInput = document.createElement("input");
+  hiddenPhotoInput.type = "file";
+  hiddenPhotoInput.accept = "image/*";
+  hiddenPhotoInput.style.display = "none";
+  document.body.appendChild(hiddenPhotoInput);
+  hiddenPhotoInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    hiddenPhotoInput.value = ""; // reset so picking the same file again still fires "change"
+    if (!file || !nav.schema) return;
+    const photoFieldId = nav.schema.photos[0]?.id;
+    if (!photoFieldId) return;
+    const reader = new FileReader();
+    reader.onload = () => nav.callbacks?.onFieldChange?.(photoFieldId, reader.result);
+    reader.readAsDataURL(file);
+  });
+  return hiddenPhotoInput;
+}
+
+function wirePrimaryPhotoUpload(container) {
+  container.querySelectorAll('[class*="-photo-placeholder"]').forEach((el) => {
+    el.style.cursor = "pointer";
+    el.title = "Click to add a photo";
+    el.addEventListener("click", () => ensureHiddenPhotoInput().click());
+  });
 }
 
 // Issue 6: the Canva-style edit icon + its style/border/filter/order/remove

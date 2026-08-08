@@ -17,6 +17,7 @@ import {
   setPhotoStyle as _setPhotoStyle,
   bringPhotoToFront as _bringPhotoToFront,
 } from "./templates/schemaUtils.js";
+import { updateCanonicalPool, applyCanonicalCarryover } from "./templates/canonicalFields.js";
 
 export const state = {
   view: "gallery", // "gallery" | "builder"
@@ -27,10 +28,33 @@ export const state = {
   fullName: "",
   phone: "",
   countryCode: "+91",
+  canonicalPool: loadCanonicalPool(),
 };
 
 const listeners = [];
 const DRAFT_PREFIX = "biodata_draft_";
+// Issue: "fill once, use everywhere" — one pool of canonical values shared
+// across ALL templates (not per-template like drafts are), so switching
+// templates carries over name/DOB/height/education/etc. automatically.
+// Template-unique fields (Gotra, Kuldaivat...) are never in this pool.
+const CANONICAL_POOL_KEY = "biodata_canonical_pool";
+
+function loadCanonicalPool() {
+  try {
+    const raw = localStorage.getItem(CANONICAL_POOL_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+let canonicalPoolSaveTimer = null;
+function saveCanonicalPool() {
+  clearTimeout(canonicalPoolSaveTimer);
+  canonicalPoolSaveTimer = setTimeout(() => {
+    localStorage.setItem(CANONICAL_POOL_KEY, JSON.stringify(state.canonicalPool));
+  }, 300);
+}
 
 export function subscribe(fn) {
   listeners.push(fn);
@@ -83,6 +107,8 @@ export function clearDraft(templateId) {
 export function setField(fieldId, value) {
   state.formData[fieldId] = value;
   saveDraft();
+  updateCanonicalPool(state.canonicalPool, state.schema, state.formData);
+  saveCanonicalPool();
   notify();
 }
 
@@ -106,6 +132,10 @@ export function selectTemplate(templateId, rawSchema) {
     state.fullName = "";
     state.phone = "";
     state.countryCode = "+91";
+    // Issue: fresh template, no draft of its own yet — pre-fill whatever
+    // shared fields the user already typed into an EARLIER template, so
+    // they never retype name/DOB/height/education/etc. per template.
+    applyCanonicalCarryover(state.schema, state.formData, state.canonicalPool);
   }
 
   state.view = "builder";

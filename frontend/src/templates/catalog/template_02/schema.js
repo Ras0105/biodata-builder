@@ -21,7 +21,7 @@ export const schema = {
             { id: "name", label: "Name", type: "text", required: true },
             { id: "dob", label: "Date of Birth", type: "date", required: true },
             { id: "height", label: "Height", type: "text", placeholder: "e.g. 5 Feet 9 Inches" },
-            { id: "education", label: "Education", type: "text", required: true },
+            { id: "education", label: "Education", type: "text" },
             { id: "occupation", label: "Occupation", type: "text" },
           ],
         },
