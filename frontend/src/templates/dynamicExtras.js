@@ -213,7 +213,7 @@ function photosOverlayHtml(theme, photos, formData) {
 // A full continuation page (page 2, 3, ...), styled as its own sheet using
 // the exact page-shell dimensions/background/border/font every template
 // uses, so it reads as "the same biodata, next page".
-function continuationPageHtml(theme, pageNumber, totalPages, photos, sections, formData) {
+function continuationPageHtml(theme, pageNumber, totalPages, photos, sections, formData, { watermark = true } = {}) {
   const borderCss = theme.border ? `border:${theme.border};` : `border:1px solid ${theme.accent};`;
   const isEmpty = !photos.length && !sections.length;
   return `
@@ -226,7 +226,7 @@ function continuationPageHtml(theme, pageNumber, totalPages, photos, sections, f
         Page ${pageNumber} of ${totalPages}
       </div>
       ${photosOverlayHtml(theme, photos, formData)}
-      ${watermarkOverlayHtml()}
+      ${watermark ? watermarkOverlayHtml() : ""}
       ${
         isEmpty
           ? `<div style="font-size:13px;font-style:italic;opacity:.6;margin-top:60px;text-align:center;">No sections added to this page yet. Use "+ Add custom section" to fill it in.</div>`
@@ -240,22 +240,28 @@ function continuationPageHtml(theme, pageNumber, totalPages, photos, sections, f
 //   the template's root div (position:absolute removes it from flow).
 // - firstPageSectionsHtml: in-flow block, must be injected right before the
 //   root div's closing tag.
-export function renderExtras(templateId, schema, formData) {
+// `watermark` defaults to true so every existing call site (the live
+// preview) is completely unaffected. The backend's server-side PDF render
+// is the ONE caller that passes { watermark: false } — see
+// backend/render/render.mjs, which imports this exact file (not a copy) so
+// the paid PDF can never drift from what this function produces here.
+export function renderExtras(templateId, schema, formData, { watermark = true } = {}) {
   const theme = getTheme(templateId);
   const extraPhotos = schema.photos.slice(1); // photos[0] is always handled by the template itself
   const totalPages = schema.pages.length;
+  const wm = watermark ? watermarkOverlayHtml() : "";
 
   const page1 = schema.pages[0];
   const page1Id = page1?.id;
   const page1CustomSections = (page1?.sections || []).filter((s) => s.custom);
   const page1Photos = extraPhotos.filter((p) => (p.page || page1Id) === page1Id);
 
-  const firstPagePhotosHtml = photosOverlayHtml(theme, page1Photos, formData) + watermarkOverlayHtml();
+  const firstPagePhotosHtml = photosOverlayHtml(theme, page1Photos, formData) + wm;
   const firstPageSectionsHtml = buildSectionsBlock(theme, page1CustomSections, formData, { topBorder: true });
 
   const extraPageHtmls = schema.pages.slice(1).map((page, i) => {
     const pagePhotos = extraPhotos.filter((p) => p.page === page.id);
-    return continuationPageHtml(theme, i + 2, totalPages, pagePhotos, page.sections, formData);
+    return continuationPageHtml(theme, i + 2, totalPages, pagePhotos, page.sections, formData, { watermark });
   });
 
   return { firstPagePhotosHtml, firstPageSectionsHtml, extraPageHtmls };

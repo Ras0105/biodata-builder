@@ -250,6 +250,10 @@ downloadBtn.addEventListener("click", () => {
       community: getTemplateMeta(state.templateId).community,
       templateId: state.templateId,
       formData: state.formData,
+      // The backend needs the LIVE (possibly mutated) schema — custom
+      // sections/pages/extra photos the user added — not just formData,
+      // or the paid PDF silently drops anything added at runtime.
+      schema: state.schema,
     },
     overlay
   );

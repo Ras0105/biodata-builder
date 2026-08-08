@@ -1,4 +1,15 @@
 # backend/Dockerfile
+#
+# IMPORTANT — build context must be the REPO ROOT, not backend/:
+#   docker build -f backend/Dockerfile .
+# (On Railway/Render: set the service's root/build directory to the repo
+# root and point it at this Dockerfile, NOT at backend/.)
+#
+# This is required because render/render.mjs imports the FRONTEND's own
+# layout.js/schema.js/dynamicExtras.js/style.css directly (see that file's
+# docstring and app/services/pdf_generator.py) — so the image needs both
+# backend/ and frontend/src/templates/ present, at the same relative
+# position to each other as in the repo, or the render step can't find them.
 
 FROM python:3.11-slim
 
@@ -9,6 +20,8 @@ FROM python:3.11-slim
 # avoids surprise breakage when Playwright's own dependency list changes.
 # ---------------------------------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gnupg \
     wget \
     ca-certificates \
     fonts-liberation \
@@ -32,6 +45,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
+# ---------------------------------------------------------------------------
+# Node.js — needed ONLY to run render/render.mjs, which reuses the
+# frontend's template modules to build each biodata's HTML. Node itself
+# never launches a browser or touches the network; Playwright (Python side)
+# is what actually prints to PDF. Pinned major version 20 (LTS).
+# ---------------------------------------------------------------------------
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
@@ -46,7 +69,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/app/.cache/ms-playwright
 # Install Python deps first — separate layer so `pip install` is cached
 # unless requirements.txt actually changes, keeping rebuilds fast.
 # ---------------------------------------------------------------------------
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright's Chromium binary (matches the version pinned in
@@ -55,14 +78,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN playwright install chromium
 
 # ---------------------------------------------------------------------------
-# App code
+# App code — backend goes to /app, frontend's template source goes to
+# /frontend, preserving the same "../../frontend" relative hop that
+# render/render.mjs uses locally (backend/render/render.mjs -> ../../frontend).
 # ---------------------------------------------------------------------------
-COPY . .
+COPY backend/. /app/
+COPY frontend/package.json /frontend/package.json
+COPY frontend/src/templates /frontend/src/templates
 
 # Run as a non-root user — Chromium in a sandboxed container behaves better
 # unprivileged, and it's good practice generally for anything handling
 # payment-adjacent data.
-RUN useradd --create-home appuser && chown -R appuser:appuser /app
+RUN useradd --create-home appuser && chown -R appuser:appuser /app /frontend
 USER appuser
 
 EXPOSE 8000

@@ -7,7 +7,7 @@ import { createOrder, pollOrderStatus } from "../api.js";
 const AMOUNT_PAISE = window.BIODATA_AMOUNT_PAISE || 1900; // ₹19, adjust to your real price
 const CURRENCY = "INR";
 
-export async function startCheckout({ email, fullName, phone, community, templateId, formData }, overlay) {
+export async function startCheckout({ email, fullName, phone, community, templateId, formData, schema }, overlay) {
   if (!email) return overlay.fail("Please add your email before downloading.");
   if (!fullName) return overlay.fail("Please add your name before downloading.");
   if (!phone) return overlay.fail("Please add your phone number before downloading.");
@@ -23,6 +23,7 @@ export async function startCheckout({ email, fullName, phone, community, templat
       community,
       templateId,
       formData,
+      schema,
       amountPaise: AMOUNT_PAISE,
       currency: CURRENCY,
     });

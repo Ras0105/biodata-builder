@@ -4,7 +4,7 @@
 
 const API_BASE = window.BIODATA_API_BASE || "";
 
-export async function createOrder({ email, fullName, phone, community, templateId, formData, amountPaise, currency }) {
+export async function createOrder({ email, fullName, phone, community, templateId, formData, schema, amountPaise, currency }) {
   const res = await fetch(`${API_BASE}/api/create-order`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -15,6 +15,10 @@ export async function createOrder({ email, fullName, phone, community, templateI
       community,
       template_id: templateId,
       form_data: formData,
+      // Live schema shape (pages/sections/photos, including anything the
+      // user added/removed) — the backend renders the PDF from this, not
+      // just the template's original schema.js.
+      schema: schema ? { id: schema.id, photos: schema.photos, pages: schema.pages } : null,
       amount_paise: amountPaise,
       currency,
     }),
