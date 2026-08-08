@@ -11,7 +11,11 @@ settings = get_settings()
 
 # render/render.mjs, resolved relative to this file unless overridden via
 # RENDER_SCRIPT_PATH (e.g. a differently-laid-out deployment).
-DEFAULT_RENDER_SCRIPT_PATH = Path(__file__).resolve().parents[3] / "render" / "render.mjs"
+# In the Docker image (see backend/Dockerfile), this file lives at
+# /app/app/services/pdf_generator.py and render.mjs lives at
+# /app/render/render.mjs — two levels up from this file's directory, not
+# three.
+DEFAULT_RENDER_SCRIPT_PATH = Path(__file__).resolve().parents[2] / "render" / "render.mjs"
 
 
 class PdfGenerationError(Exception):
