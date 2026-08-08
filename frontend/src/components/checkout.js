@@ -45,8 +45,8 @@ export async function startCheckout({ email, fullName, phone, community, templat
       overlay.show("Payment received. Generating your biodata…");
       pollOrderStatus(order.order_id)
         .then(() => {
-          overlay.show("Done! Your biodata has been emailed to you.");
-          setTimeout(overlay.hide, 4000);
+          overlay.show(`Done! Your biodata has been emailed to ${email}. Tap anywhere to close.`);
+          setTimeout(overlay.hide, 10000);
         })
         .catch(() => {
           overlay.show("Payment went through, but generation is taking longer than expected. We'll email it as soon as it's ready.");

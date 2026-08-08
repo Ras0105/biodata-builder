@@ -73,6 +73,9 @@ const overlay = {
   hide: () => { overlayEl.hidden = true; },
   fail: (msg) => { overlay.hide(); alert(msg); },
 };
+// Let the user tap/click the overlay to dismiss it right away, instead of
+// being forced to wait out whatever auto-hide timer the caller set.
+overlayEl.addEventListener("click", () => overlay.hide());
 
 function showView() {
   viewGallery.hidden = state.view !== "gallery";
