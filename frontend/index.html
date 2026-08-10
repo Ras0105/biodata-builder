@@ -82,8 +82,15 @@
 
     <section id="view-builder" hidden>
       <div class="top-actions">
-        <button type="button" id="backBtn" class="btn btn-secondary">&larr; Back to templates</button>
-        <button type="button" id="restartBtn" class="btn btn-secondary btn-danger-outline">&#8635; Start over</button>
+        <div class="top-actions-left">
+          <button type="button" id="backBtn" class="btn btn-secondary">&larr; Back to templates</button>
+          <button type="button" id="restartBtn" class="btn btn-secondary btn-danger-outline">&#8635; Start over</button>
+        </div>
+        <div class="top-actions-right">
+          <div id="downloadBlockReason" class="field-error download-block-reason"></div>
+          <button type="button" id="shareBtn" class="btn btn-secondary">Share preview</button>
+          <button type="button" id="downloadBtn" class="btn">Pay &amp; Download</button>
+        </div>
       </div>
 
       <div class="builder-layout">
@@ -122,12 +129,6 @@
             <button type="button" id="nextPageBtn" class="preview-arrow" aria-label="Next page">&rarr;</button>
           </div>
         </div>
-      </div>
-
-      <div class="checkout-bar">
-        <div id="downloadBlockReason" class="field-error download-block-reason"></div>
-        <button type="button" id="shareBtn" class="btn btn-secondary">Share preview</button>
-        <button type="button" id="downloadBtn" class="btn">Pay &amp; Download</button>
       </div>
     </section>
 

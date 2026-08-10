@@ -526,9 +526,24 @@ body {
 .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
 .btn-primary { width: 100%; margin-top: 10px; }
 
-.top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.checkout-bar { margin-top: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
-.download-block-reason { margin-top: 0; text-align: right; max-width: 420px; }
+.top-actions {
+  position: sticky;
+  top: 66px;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -32px 20px;
+  padding: 12px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-soft);
+  box-shadow: 0 6px 16px -12px var(--shadow-color);
+}
+.top-actions-left, .top-actions-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top-actions-right { justify-content: flex-end; margin-left: auto; }
+.download-block-reason { margin-top: 0; text-align: right; max-width: 260px; }
 
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -571,14 +586,16 @@ body {
     grid-template-columns: 1fr; /* stack full name / email */
   }
 
-  .top-actions { flex-direction: column; align-items: stretch; gap: 10px; }
-  .checkout-bar { justify-content: stretch; }
-  .checkout-bar .btn { width: 100%; }
+  .top-actions { margin: 0 -16px 20px; padding: 10px 16px; flex-direction: column; align-items: stretch; gap: 10px; }
+  .top-actions-left, .top-actions-right { justify-content: stretch; }
+  .top-actions-left .btn, .top-actions-right .btn { flex: 1 1 auto; }
+  .download-block-reason { text-align: left; max-width: none; flex-basis: 100%; }
 }
 
 @media (max-width: 480px) {
-  .app-header { padding: 14px 16px; }
+  .app-header { padding: 14px 16px; top: 0; }
   .app-header .brand { font-size: 17px; }
+  .top-actions { top: 62px; }
   .form-field input, .form-field textarea { font-size: 16px; } /* prevents iOS auto-zoom on focus */
 }
 
