@@ -40,11 +40,19 @@ export function renderGallery(container, onSelect) {
   }
 
   visible.forEach((meta) => {
+    const isGeneral = (meta.community || "General") === "General";
+    const badgeLabel = isGeneral ? "General / Job" : "Marriage / Traditional";
+    const badgeClass = isGeneral ? "badge-general" : "badge-marriage";
+
     const card = document.createElement("div");
     card.className = "template-card";
     card.innerHTML = `
       <div class="template-card-thumb">
+        <span class="template-card-badge ${badgeClass}">${badgeLabel}</span>
         <img src="${meta.thumbnail}" alt="${meta.name}" onerror="this.style.display='none'; this.parentElement.classList.add('no-thumb');" />
+        <div class="template-card-overlay">
+          <span class="template-card-overlay-btn">Preview &amp; Edit</span>
+        </div>
       </div>
       <div class="template-card-body">
         <div class="template-card-name">${meta.name}</div>

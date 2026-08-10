@@ -3,21 +3,80 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0f172a" />
 <title>Biodata Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  // Apply saved theme before first paint to avoid a light/dark flash.
+  (function () {
+    try {
+      var saved = localStorage.getItem("aananda-theme");
+      var theme = saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">Biodata Builder</div>
+    <div class="brand">
+      <img class="brand-mark" src="src/assets/aananda-logo-mark.png" alt="Aananda Digital" />
+      <span class="brand-text">Aananda Digital<span class="brand-sub">Biodata Builder</span></span>
+    </div>
+    <div class="app-header-actions">
+      <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="#galleryGrid" class="btn btn-header-cta">Browse Templates</a>
+    </div>
   </header>
 
   <main class="container">
 
     <section id="view-gallery">
-      <h1 style="margin-top:0;">Choose a template</h1>
-      <p style="color:#666; margin-bottom:24px;">Pick a style, fill in your details, preview live, then download.</p>
+
+      <section class="hero" id="hero">
+        <div class="hero-copy">
+          <span class="hero-eyebrow">&#10024; Crafted for Elegance &bull; Trusted Across India</span>
+          <h1 class="hero-title">Create a biodata that makes the <em>right</em> first impression.</h1>
+          <p class="hero-subtitle">
+            Beautiful, print-ready biodata designs for marriage proposals and professional
+            profiles — fill in your details once, preview live, and download a polished PDF in minutes.
+          </p>
+          <div class="hero-cta-row">
+            <a href="#galleryGrid" class="btn btn-hero-primary">Create Biodata Now</a>
+            <a href="#galleryGrid" class="btn btn-hero-secondary">Browse Templates</a>
+          </div>
+          <div class="hero-trust-badges">
+            <div class="trust-badge"><span class="trust-badge-icon">&#10003;</span> 24 premium templates</div>
+            <div class="trust-badge"><span class="trust-badge-icon">&#10003;</span> Instant live preview</div>
+            <div class="trust-badge"><span class="trust-badge-icon">&#10003;</span> Print-ready PDF export</div>
+            <div class="trust-badge"><span class="trust-badge-icon">&#10003;</span> Secure &amp; private</div>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-card hero-card-back"></div>
+          <div class="hero-card hero-card-mid"></div>
+          <div class="hero-card hero-card-front">
+            <div class="hero-card-photo"></div>
+            <div class="hero-card-line hero-card-line-1"></div>
+            <div class="hero-card-line hero-card-line-2"></div>
+            <div class="hero-card-line hero-card-line-3"></div>
+            <div class="hero-card-line hero-card-line-4"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="gallery-heading">
+        <h2>Choose a template</h2>
+        <p class="gallery-subtitle">Pick a style, fill in your details, preview live, then download.</p>
+      </div>
       <div id="galleryGrid"></div>
     </section>
 
@@ -74,6 +133,55 @@
 
   </main>
 
+  <footer class="app-footer">
+    <div class="app-footer-inner">
+      <div class="app-footer-grid">
+        <div class="app-footer-col app-footer-brand-col">
+          <div class="app-footer-brand">
+            <img src="src/assets/aananda-logo-mark.png" alt="Aananda Digital" class="app-footer-mark" />
+            <div>
+              <div class="app-footer-name">Aananda Digital</div>
+              <div class="app-footer-tag">A venture of Aananda Creations</div>
+            </div>
+          </div>
+          <p class="app-footer-blurb">
+            We help you create polished, print-ready biodatas in minutes — from traditional
+            marriage profiles to clean professional resumes, all previewed live as you type.
+          </p>
+        </div>
+
+        <div class="app-footer-col">
+          <h4 class="app-footer-heading">Quick Links</h4>
+          <a href="#hero">Home</a>
+          <a href="#galleryGrid">Browse Templates</a>
+          <a href="#hero">Features</a>
+          <a href="#hero">How It Works</a>
+        </div>
+
+        <div class="app-footer-col">
+          <h4 class="app-footer-heading">Categories</h4>
+          <a href="#galleryGrid">Marriage Biodata</a>
+          <a href="#galleryGrid">Professional Resume</a>
+          <a href="#galleryGrid">Modern Profiles</a>
+          <a href="#galleryGrid">Traditional Designs</a>
+        </div>
+
+        <div class="app-footer-col">
+          <h4 class="app-footer-heading">Legal &amp; Trust</h4>
+          <a href="#hero">Privacy Policy</a>
+          <a href="#hero">Terms of Service</a>
+          <a href="#hero">Contact Support</a>
+          <span class="app-footer-trust">&#128274; Secure PDF Export</span>
+        </div>
+      </div>
+
+      <div class="app-footer-bottom">
+        <div class="app-footer-copy">&copy; <span id="footerYear"></span> Aananda Digital. All rights reserved.</div>
+        <button type="button" id="backToTop" class="app-footer-top-btn">Back to top &uarr;</button>
+      </div>
+    </div>
+  </footer>
+
   <div id="overlay" class="overlay" hidden>
     <div id="overlayText">Working…</div>
   </div>
@@ -83,5 +191,9 @@
     window.BIODATA_API_BASE = "https://biodata-builder-production.up.railway.app";
   </script>
   <script type="module" src="src/main.js"></script>
+  <script>
+    var fy = document.getElementById("footerYear");
+    if (fy) fy.textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>

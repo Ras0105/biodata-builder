@@ -12,6 +12,28 @@ import {
   setPhotoStyle, bringPhotoToFront, restartCurrentTemplate,
 } from "./state.js";
 
+// --- Theme toggle (light/dark), persisted to localStorage. Self-contained:
+// applied to <html data-theme="..."> which every CSS variable in style.css
+// reads from. A blocking inline script in index.html already applied the
+// saved/system theme before first paint; this just wires up the button.
+const THEME_KEY = "aananda-theme";
+const themeToggleBtn = document.getElementById("themeToggle");
+function getTheme() {
+  return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+}
+function setTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+}
+themeToggleBtn?.addEventListener("click", () => {
+  setTheme(getTheme() === "dark" ? "light" : "dark");
+});
+
+// --- Back-to-top button in the footer ---
+document.getElementById("backToTop")?.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 const viewGallery = document.getElementById("view-gallery");
 const viewBuilder = document.getElementById("view-builder");
 const galleryGrid = document.getElementById("galleryGrid");
