@@ -5,6 +5,7 @@ import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
 import { shareCurrentPreview } from "./components/sharePreview.js";
 import { calculateAge, findDobFieldId } from "./templates/schemaUtils.js";
+import { initBackToTop } from "./theme.js";
 import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
@@ -29,26 +30,8 @@ themeToggleBtn?.addEventListener("click", () => {
   setTheme(getTheme() === "dark" ? "light" : "dark");
 });
 
-// --- Back-to-top button in the footer ---
-// Plain window.scrollTo({behavior:"smooth"}) silently no-ops in some in-app
-// browsers (WhatsApp/Instagram webviews, older iOS Safari), which is where
-// this link is often opened from after a share. Feature-detect and fall
-// back to a manual rAF-based scroll so the button always works.
-function scrollToTop() {
-  const supportsSmooth = "scrollBehavior" in document.documentElement.style;
-  if (supportsSmooth) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return;
-  }
-  const step = () => {
-    const y = window.scrollY || document.documentElement.scrollTop;
-    if (y <= 0) return;
-    window.scrollTo(0, Math.max(y - Math.ceil(y / 8), 0));
-    requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-document.getElementById("backToTop")?.addEventListener("click", scrollToTop);
+// --- Back-to-top: footer link + floating fixed button (see theme.js) ---
+initBackToTop();
 
 const viewGallery = document.getElementById("view-gallery");
 const viewBuilder = document.getElementById("view-builder");

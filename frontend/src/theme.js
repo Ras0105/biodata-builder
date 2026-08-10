@@ -25,25 +25,49 @@ export function initThemeToggle() {
   });
 }
 
-// Wires up the #backToTop button, if present on the page.
-// See main.js scrollToTop() for why this isn't a plain smooth scrollTo.
-export function initBackToTop() {
-  const btn = document.getElementById("backToTop");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const supportsSmooth = "scrollBehavior" in document.documentElement.style;
-    if (supportsSmooth) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    const step = () => {
-      const y = window.scrollY || document.documentElement.scrollTop;
-      if (y <= 0) return;
-      window.scrollTo(0, Math.max(y - Math.ceil(y / 8), 0));
-      requestAnimationFrame(step);
-    };
+// Plain window.scrollTo({behavior:"smooth"}) silently no-ops in some in-app
+// browsers (WhatsApp/Instagram webviews, older iOS Safari), which is where
+// this is often triggered from after a share. Feature-detect and fall back
+// to a manual rAF-based scroll so it always works.
+function scrollToTop() {
+  const supportsSmooth = "scrollBehavior" in document.documentElement.style;
+  if (supportsSmooth) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const step = () => {
+    const y = window.scrollY || document.documentElement.scrollTop;
+    if (y <= 0) return;
+    window.scrollTo(0, Math.max(y - Math.ceil(y / 8), 0));
     requestAnimationFrame(step);
-  });
+  };
+  requestAnimationFrame(step);
+}
+
+// Wires up the #backToTop footer link (if present) AND injects a floating,
+// fixed-position back-to-top button that appears as soon as the page is
+// scrolled down a little — reachable from anywhere, not just once you've
+// scrolled all the way down to the footer.
+export function initBackToTop() {
+  const footerBtn = document.getElementById("backToTop");
+  footerBtn?.addEventListener("click", scrollToTop);
+
+  if (document.getElementById("scrollTopFab")) return; // already injected
+  const fab = document.createElement("button");
+  fab.type = "button";
+  fab.id = "scrollTopFab";
+  fab.className = "scroll-top-fab";
+  fab.setAttribute("aria-label", "Back to top");
+  fab.innerHTML = "&uarr;";
+  fab.addEventListener("click", scrollToTop);
+  document.body.appendChild(fab);
+
+  const SHOW_AFTER = 320;
+  const toggle = () => {
+    fab.classList.toggle("is-visible", (window.scrollY || document.documentElement.scrollTop) > SHOW_AFTER);
+  };
+  window.addEventListener("scroll", toggle, { passive: true });
+  toggle();
 }
 
 export function initFooterYear() {
