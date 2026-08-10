@@ -1,5 +1,5 @@
 import { getTemplateMeta, getCategories } from "./templates/registry.js";
-import { renderGallery } from "./components/templateGallery.js";
+import { renderGallery, setActiveCategory } from "./components/templateGallery.js";
 import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
 import { startCheckout } from "./components/checkout.js";
@@ -30,9 +30,25 @@ themeToggleBtn?.addEventListener("click", () => {
 });
 
 // --- Back-to-top button in the footer ---
-document.getElementById("backToTop")?.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+// Plain window.scrollTo({behavior:"smooth"}) silently no-ops in some in-app
+// browsers (WhatsApp/Instagram webviews, older iOS Safari), which is where
+// this link is often opened from after a share. Feature-detect and fall
+// back to a manual rAF-based scroll so the button always works.
+function scrollToTop() {
+  const supportsSmooth = "scrollBehavior" in document.documentElement.style;
+  if (supportsSmooth) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const step = () => {
+    const y = window.scrollY || document.documentElement.scrollTop;
+    if (y <= 0) return;
+    window.scrollTo(0, Math.max(y - Math.ceil(y / 8), 0));
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+document.getElementById("backToTop")?.addEventListener("click", scrollToTop);
 
 const viewGallery = document.getElementById("view-gallery");
 const viewBuilder = document.getElementById("view-builder");
@@ -303,5 +319,15 @@ function routeFromHash() {
 
 window.addEventListener("hashchange", routeFromHash);
 
+// Deep link into a filtered gallery category, e.g. index.html?cat=Marriage#galleryGrid
+// (used by the footer's "Categories" links). Separate from the #/templateId
+// hash router below on purpose — a query param can't collide with it.
+const catParam = new URLSearchParams(location.search).get("cat");
+if (catParam) setActiveCategory(catParam);
+
 renderGallery(galleryGrid, (id) => onSelectTemplate(id));
 routeFromHash(); // handles initial load, including a refresh mid-builder
+
+if (catParam) {
+  document.getElementById("galleryGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}

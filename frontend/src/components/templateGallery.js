@@ -9,6 +9,13 @@ import { TEMPLATE_REGISTRY, getCategories, listCategories } from "../templates/r
 
 let activeCategory = "All";
 
+// Lets callers (e.g. deep-linked "?cat=Marriage" URLs) set the starting
+// filter before the first render. Falls back to "All" for an unknown value
+// so a bad/old link never renders an empty gallery.
+export function setActiveCategory(category) {
+  activeCategory = listCategories().includes(category) ? category : "All";
+}
+
 export function renderGallery(container, onSelect) {
   container.innerHTML = "";
 

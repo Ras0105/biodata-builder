@@ -26,11 +26,23 @@ export function initThemeToggle() {
 }
 
 // Wires up the #backToTop button, if present on the page.
+// See main.js scrollToTop() for why this isn't a plain smooth scrollTo.
 export function initBackToTop() {
   const btn = document.getElementById("backToTop");
   if (!btn) return;
   btn.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const supportsSmooth = "scrollBehavior" in document.documentElement.style;
+    if (supportsSmooth) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const step = () => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      if (y <= 0) return;
+      window.scrollTo(0, Math.max(y - Math.ceil(y / 8), 0));
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   });
 }
 
