@@ -1,16 +1,17 @@
-// layout.js — template_01 (Hindu Classic Ivory)
-// Pure rendering: (formData) -> HTML string for the live preview / print sheet.
-// Knows nothing about other templates. Styling comes entirely from style.css.
+// layout.js — template_01 (Uttarakhand Aipan Art — Vasudhara / Aipan Bel)
 
 import { schema } from "./schema.js";
 
 function esc(str) {
-  return (str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  return (str || "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
 }
 
-// Formats "date"-type field values (stored as raw YYYY-MM-DD from the date
-// input) into a readable form for display, e.g. "12 Apr 1998". Leaves every
-// other field type untouched.
 function fmt(field, value) {
   if (field.type !== "date" || !value) return value;
   const d = new Date(value);
@@ -36,29 +37,47 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template01">
+      <!-- Vasudhara / Aipan Bel border strips -->
+      <div class="bd-edge bd-edge-top"></div>
+      <div class="bd-edge bd-edge-bottom"></div>
+      <div class="bd-edge bd-edge-left"></div>
+      <div class="bd-edge bd-edge-right"></div>
+
+      <!-- Aipan rosette corners -->
       <div class="bd-corner bd-corner-tl"></div>
       <div class="bd-corner bd-corner-tr"></div>
       <div class="bd-corner bd-corner-bl"></div>
       <div class="bd-corner bd-corner-br"></div>
 
-      <div class="bd-photo-wrap">
+      <div class="bd-content">
+        <!-- Circular Photo Frame -->
+        <div class="bd-photo-wrap">
+          ${
+            photoSrc
+              ? `<img class="bd-photo" src="${photoSrc}" alt="Photo" />`
+              : `<div class="bd-photo bd-photo-placeholder">Photo</div>`
+          }
+        </div>
+
         ${
-          photoSrc
-            ? `<img class="bd-photo" src="${photoSrc}" alt="Photo" />`
-            : `<div class="bd-photo bd-photo-placeholder">Photo</div>`
+          personal
+            ? `
+        <h2 class="bd-section-title">${esc(personal.title)}</h2>
+        <div class="bd-section">
+          ${(personal.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
+        </div>`
+            : ""
+        }
+
+        ${
+          family
+            ? `
+        <h2 class="bd-section-title">${esc(family.title)}</h2>
+        <div class="bd-section">
+          ${(family.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
+        </div>`
+            : ""
         }
       </div>
-
-      ${personal ? `
-      <h2 class="bd-section-title">${esc(personal.title)}</h2>
-      <div class="bd-section">
-        ${(personal.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
-      </div>` : ""}
-
-      ${family ? `
-      <h2 class="bd-section-title">${esc(family.title)}</h2>
-      <div class="bd-section">
-        ${(family.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
-      </div>` : ""}
     </div>`;
 }
