@@ -34,13 +34,34 @@ themeToggleBtn?.addEventListener("click", () => {
 // --- Hero logo video: two <video> tags (dark/light) sit in the DOM at once;
 // CSS shows/hides by data-theme, but only the visible one should actually
 // play, so the hidden one isn't wasting decode/battery in the background.
+// When the theme is toggled mid-clip, the newly-visible video should pick
+// up from the exact same timestamp the outgoing one was at — not restart
+// from 0 — so the rotation feels continuous through the switch.
 function syncHeroVideos() {
   const theme = getTheme();
-  document.querySelectorAll(".hero-logo-video").forEach((video) => {
-    if (video.dataset.themeVideo === theme) {
-      video.play?.().catch(() => {}); // autoplay can reject before user interaction on some browsers; harmless
-    } else {
+  const videos = document.querySelectorAll(".hero-logo-video");
+
+  let handoffTime = 0;
+  videos.forEach((video) => {
+    if (!video.paused) handoffTime = video.currentTime;
+  });
+
+  videos.forEach((video) => {
+    if (video.dataset.themeVideo !== theme) {
       video.pause?.();
+      return;
+    }
+    const resumeFromHandoff = () => {
+      // Wrap into this clip's own duration in case the two exports aren't
+      // frame-for-frame the same length (e.g. 10.02s vs 9.98s).
+      const duration = video.duration || 10;
+      video.currentTime = duration > 0 ? handoffTime % duration : 0;
+      video.play?.().catch(() => {}); // autoplay can reject before user interaction on some browsers; harmless
+    };
+    if (video.readyState >= 1) {
+      resumeFromHandoff();
+    } else {
+      video.addEventListener("loadedmetadata", resumeFromHandoff, { once: true });
     }
   });
 }
