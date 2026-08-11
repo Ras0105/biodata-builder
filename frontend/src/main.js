@@ -18,7 +18,11 @@ import {
 // reads from. A blocking inline script in index.html already applied the
 // saved/system theme before first paint; this just wires up the button.
 const THEME_KEY = "aananda-theme";
-const themeToggleBtn = document.getElementById("themeToggle");
+// There are now two theme-toggle buttons in the DOM (desktop header +
+// mobile dropdown), both sharing the .theme-toggle class — wire them both
+// up the same way; the sun/moon icon swap is already driven purely by the
+// [data-theme] attribute on <html>, so no per-button state to track.
+const themeToggleBtns = document.querySelectorAll(".theme-toggle");
 function getTheme() {
   return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
 }
@@ -27,8 +31,46 @@ function setTheme(theme) {
   try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
   syncHeroVideos();
 }
-themeToggleBtn?.addEventListener("click", () => {
-  setTheme(getTheme() === "dark" ? "light" : "dark");
+themeToggleBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setTheme(getTheme() === "dark" ? "light" : "dark");
+  });
+});
+
+// --- Mobile hamburger menu: toggles the dropdown holding nav links, theme
+// toggle and the "Browse Templates" CTA once they're pulled out of the
+// header bar below the 860px breakpoint (see style.css).
+const navToggleBtn = document.getElementById("navToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+function closeMobileMenu() {
+  if (!navToggleBtn || !mobileMenu) return;
+  navToggleBtn.setAttribute("aria-expanded", "false");
+  mobileMenu.hidden = true;
+}
+function openMobileMenu() {
+  if (!navToggleBtn || !mobileMenu) return;
+  navToggleBtn.setAttribute("aria-expanded", "true");
+  mobileMenu.hidden = false;
+}
+navToggleBtn?.addEventListener("click", () => {
+  const isOpen = navToggleBtn.getAttribute("aria-expanded") === "true";
+  if (isOpen) closeMobileMenu(); else openMobileMenu();
+});
+mobileMenu?.addEventListener("click", (e) => {
+  // Close after a nav link is picked, but not on the theme-toggle click
+  // inside the same menu (that shouldn't dismiss the menu).
+  if (e.target.closest("a")) closeMobileMenu();
+});
+document.addEventListener("click", (e) => {
+  if (!mobileMenu || mobileMenu.hidden) return;
+  if (mobileMenu.contains(e.target) || navToggleBtn?.contains(e.target)) return;
+  closeMobileMenu();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeMobileMenu();
+});
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 860) closeMobileMenu();
 });
 
 // --- Hero logo video: two <video> tags (dark/light) sit in the DOM at once;
