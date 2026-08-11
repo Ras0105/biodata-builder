@@ -37,8 +37,11 @@ class Settings(BaseSettings):
     STORAGE_ACCESS_KEY: str
     STORAGE_SECRET_KEY: str
 
-    # ---- Signed download links ----
-    DOWNLOAD_LINK_SECRET: str
+    # ---- Download links ----
+    # Note: there is no DOWNLOAD_LINK_SECRET. Token security comes entirely
+    # from secrets.token_urlsafe(32) randomness (see
+    # services/storage.py::generate_download_token) — tokens aren't HMAC-
+    # signed, so there's nothing here to sign them with.
     DOWNLOAD_LINK_EXPIRY_MINUTES: int = 1440
 
     # ---- Email (SendGrid) ----

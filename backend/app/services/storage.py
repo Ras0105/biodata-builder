@@ -57,25 +57,19 @@ def upload_pdf(order_id: str, pdf_bytes: bytes) -> str:
     return key
 
 
-# def get_presigned_download_url(storage_key: str, expires_in_seconds: int = 120) -> str:
-#     """
-#     Generates a short-lived presigned URL for a single download. This is
-#     a second, independent layer of expiry on top of GeneratedPdf's own
-#     token_expires_at — even if someone got hold of a valid download token,
-#     the underlying object URL itself goes stale within minutes.
-#     """
-#     try:
-#         return _s3_client.generate_presigned_url(
-#             "get_object",
-#             Params={"Bucket": settings.STORAGE_BUCKET, "Key": storage_key},
-#             ExpiresIn=expires_in_seconds,
-#         )
-#     except (BotoCoreError, ClientError) as exc:
-#         raise StorageError(f"Failed to generate download URL for {storage_key}: {exc}") from exc
-
-def get_presigned_download_url(storage_key: str, expires_in_seconds: int = 6000) -> str:
+def get_presigned_download_url(storage_key: str, expires_in_seconds: int = 120) -> str:
     """
-    Generates a short-lived presigned URL that forces browser download.
+    Generates a short-lived presigned URL for a single download, forcing
+    browser download via Content-Disposition. This is a second, independent
+    layer of expiry on top of GeneratedPdf's own token_expires_at — even if
+    someone got hold of a valid download token, the underlying object URL
+    itself goes stale within minutes.
+
+    Deliberately short (120s / 2 minutes): this is generated fresh on every
+    /api/download/{token} request and the browser is redirected to it
+    immediately (see routers/downloads.py), so there's no legitimate reason
+    for it to outlive the redirect by much. Keeping it short minimizes the
+    window in which a leaked/logged/proxied URL would still work.
     """
     try:
         return _s3_client.generate_presigned_url(

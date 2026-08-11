@@ -46,9 +46,18 @@ class OrderCreateRequest(BaseModel):
     # clients — render/render.mjs falls back to the template's own
     # schema.js in that case, which just means custom sections/pages/extra
     # photos won't appear in the PDF).
-    schema: Optional[SchemaSnapshot] = None
+    #
+    # Named schema_snapshot (not `schema`) on the Python side — `schema` is
+    # a name BaseModel itself defines (a deprecated method pre-v3), so a
+    # field with that exact name shadows it and triggers a warning. The
+    # `alias="schema"` keeps the wire-format JSON key unchanged — the
+    # frontend (frontend/src/api.js) already sends `schema: {...}` in the
+    # request body and doesn't need to change.
+    schema_snapshot: Optional[SchemaSnapshot] = Field(default=None, alias="schema")
     amount_paise: int = Field(gt=0, description="Amount in smallest currency unit (e.g. paise)")
     currency: str = Field(default="INR", min_length=3, max_length=3)
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class OrderCreateResponse(BaseModel):

@@ -55,8 +55,9 @@ def download_resume(token: str, db: Session = Depends(get_db)):
 
     # Generate a short-lived presigned URL to the actual object rather than
     # streaming the file through this endpoint — cheaper, and the storage
-    # provider's own URL expiry gives a second layer of time-boxing.
-    presigned_url = get_presigned_download_url(pdf.storage_key, expires_in_seconds=120)
+    # provider's own URL expiry gives a second layer of time-boxing. Uses
+    # get_presigned_download_url's own default expiry (see storage.py).
+    presigned_url = get_presigned_download_url(pdf.storage_key)
 
     pdf.download_count += 1
     db.commit()
