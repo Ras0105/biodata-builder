@@ -62,6 +62,12 @@ body {
   background: var(--bg);
   color: var(--text);
   transition: background 0.25s ease, color 0.25s ease;
+  /* Safety net: transform:scale() (used to shrink the fixed-width template
+     page to fit narrow screens, see .preview-scale/.preview-panel below)
+     doesn't shrink the element's LAYOUT box, only its paint — so without
+     this, the pre-scale width can still push a horizontal scrollbar /
+     bleed the template off the right edge on mobile. */
+  overflow-x: hidden;
 }
 
 /* Base button reset — deliberately the FIRST button rule in the file so
@@ -668,8 +674,89 @@ body {
   background: var(--accent-soft);
   border-color: var(--accent);
 }
-.preview-panel { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.preview-scale { transform-origin: top center; }
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0; /* lets this shrink below its content's intrinsic width in the grid/flex parent */
+  overflow: hidden; /* clips the fixed-width template's pre-transform box (see body rule above) */
+}
+.preview-scale { transform-origin: top center; max-width: 100%; }
+
+/* ---- "View full screen" trigger above the preview ---- */
+.preview-fullscreen-btn {
+  display: none; /* only shown on mobile, see media query — desktop already has room */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: stretch;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.preview-fullscreen-btn:hover { border-color: var(--gold); }
+
+/* ---- Full-screen preview modal: takes over the whole viewport so the
+   template can be seen without the sticky top-actions bar / form getting
+   in the way, with its own close button. ---- */
+.preview-fullscreen[hidden] { display: none; }
+.preview-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.preview-fullscreen-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--header-bg);
+  color: var(--header-text);
+  flex-shrink: 0;
+}
+.preview-fullscreen-title { font-weight: 700; font-size: 15px; }
+.preview-fullscreen-close {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.preview-fullscreen-close:hover { background: rgba(255,255,255,0.14); border-color: var(--gold); }
+.preview-fullscreen-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+/* Inside fullscreen, the moved .preview-scale should fill the available
+   width so applyResponsiveScale() (livePreview.js) scales the page up
+   rather than staying pinned to the narrow in-page panel size. The wrapper
+   below clips the fixed-width template's pre-transform box, same reasoning
+   as .preview-panel above. */
+.preview-fullscreen-body .preview-scale { width: 100%; max-width: 735px; }
 
 /* ---- field hint (e.g. age validation) ---- */
 .field-hint { font-size: 12px; margin-top: 2px; min-height: 14px; }
@@ -773,6 +860,8 @@ body {
     order: 2; /* form first, preview below on mobile */
   }
 
+  .preview-fullscreen-btn { display: flex; }
+
   .preview-scale {
     transform: none; /* let JS-driven width scaling take over, see main.js */
     width: 100%;
@@ -796,7 +885,6 @@ body {
    header never gets cramped or overflows on any phone width. ---- */
 @media (max-width: 860px) {
   .app-nav { display: none; }
-  .app-header-actions > .theme-toggle,
   .app-header-actions > .btn-header-cta { display: none; }
   .nav-toggle { display: inline-flex; }
 

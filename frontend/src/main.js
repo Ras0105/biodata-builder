@@ -139,6 +139,12 @@ const viewBuilder = document.getElementById("view-builder");
 const galleryGrid = document.getElementById("galleryGrid");
 const formMount = document.getElementById("formMount");
 const previewMount = document.getElementById("previewMount");
+const previewFullscreenBtn = document.getElementById("previewFullscreenBtn");
+const previewFullscreenClose = document.getElementById("previewFullscreenClose");
+const previewFullscreenEl = document.getElementById("previewFullscreen");
+const previewFullscreenBody = document.getElementById("previewFullscreenBody");
+const previewScaleEl = document.querySelector(".preview-scale");
+const previewNavEl = document.getElementById("previewNav");
 const backBtn = document.getElementById("backBtn");
 const restartBtn = document.getElementById("restartBtn");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -199,9 +205,46 @@ const overlay = {
 // being forced to wait out whatever auto-hide timer the caller set.
 overlayEl.addEventListener("click", () => overlay.hide());
 
+// --- Full-screen preview: on mobile the sticky top-actions bar (Back/Start
+// over/Share/Pay) eats a lot of vertical space and crowds out the actual
+// template, so this lets the user pop just the live preview into a
+// distraction-free full-screen view. Rather than re-rendering a second copy,
+// it physically moves the existing .preview-scale + #previewNav nodes into
+// the modal (and back on close) — same DOM elements, so every id lookup,
+// event listener, and the drag/resize handlers on extra photos keep working
+// untouched. A resize event is dispatched after moving so livePreview.js's
+// own resize listener recalculates the scale for the new (wider) container.
+const previewFullscreenAnchorBtn = previewFullscreenBtn; // preview-panel's stable anchor point
+let previewFullscreenOpen = false;
+
+function openPreviewFullscreen() {
+  if (previewFullscreenOpen || !previewFullscreenEl || !previewScaleEl) return;
+  previewFullscreenOpen = true;
+  previewFullscreenBody.appendChild(previewScaleEl);
+  if (previewNavEl) previewFullscreenBody.appendChild(previewNavEl);
+  previewFullscreenEl.hidden = false;
+  document.body.style.overflow = "hidden";
+  requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+}
+function closePreviewFullscreen() {
+  if (!previewFullscreenOpen) return;
+  previewFullscreenOpen = false;
+  previewFullscreenAnchorBtn?.after(previewScaleEl);
+  if (previewNavEl) previewScaleEl.after(previewNavEl);
+  previewFullscreenEl.hidden = true;
+  document.body.style.overflow = "";
+  requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+}
+previewFullscreenBtn?.addEventListener("click", openPreviewFullscreen);
+previewFullscreenClose?.addEventListener("click", closePreviewFullscreen);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closePreviewFullscreen();
+});
+
 function showView() {
   viewGallery.hidden = state.view !== "gallery";
   viewBuilder.hidden = state.view !== "builder";
+  if (state.view !== "builder") closePreviewFullscreen();
 }
 
 // Re-renders both the form panel and the live preview from current state.
