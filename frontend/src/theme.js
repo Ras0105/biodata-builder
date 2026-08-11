@@ -12,6 +12,7 @@ export function getTheme() {
 export function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  document.dispatchEvent(new CustomEvent("aananda:themechange", { detail: { theme } }));
 }
 
 // Wires up the #themeToggle button, if present on the page. The initial

@@ -25,9 +25,47 @@ function getTheme() {
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  syncHeroVideos();
 }
 themeToggleBtn?.addEventListener("click", () => {
   setTheme(getTheme() === "dark" ? "light" : "dark");
+});
+
+// --- Hero logo video: two <video> tags (dark/light) sit in the DOM at once;
+// CSS shows/hides by data-theme, but only the visible one should actually
+// play, so the hidden one isn't wasting decode/battery in the background.
+function syncHeroVideos() {
+  const theme = getTheme();
+  document.querySelectorAll(".hero-logo-video").forEach((video) => {
+    if (video.dataset.themeVideo === theme) {
+      video.play?.().catch(() => {}); // autoplay can reject before user interaction on some browsers; harmless
+    } else {
+      video.pause?.();
+    }
+  });
+}
+syncHeroVideos();
+
+// --- Hero logo tap animation: a short gold pulse-ring + scale "press",
+// since the video itself is a passive idle loop (see the rotate prompt) —
+// the interactive feel is layered on top here instead of baked into the clip.
+const heroLogoShowcase = document.getElementById("heroLogoShowcase");
+function playHeroLogoTap() {
+  if (!heroLogoShowcase) return;
+  heroLogoShowcase.classList.remove("is-tapped");
+  // Force reflow so re-adding the class restarts the animation on rapid taps.
+  void heroLogoShowcase.offsetWidth;
+  heroLogoShowcase.classList.add("is-tapped");
+}
+heroLogoShowcase?.addEventListener("click", playHeroLogoTap);
+heroLogoShowcase?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    playHeroLogoTap();
+  }
+});
+heroLogoShowcase?.addEventListener("animationend", (e) => {
+  if (e.animationName === "heroLogoPulse") heroLogoShowcase.classList.remove("is-tapped");
 });
 
 // --- Back-to-top: footer link + floating fixed button (see theme.js) ---
