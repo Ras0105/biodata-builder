@@ -52,6 +52,11 @@
           <p>Have your Razorpay payment ID or order ID ready.</p>
           <a class="contact-link" href="./refund-policy.html">View Refund Policy &rarr;</a>
         </div>
+        <div class="contact-card">
+          <h3>&#128030; Found a bug or issue?</h3>
+          <p>Broken preview, wrong template rendering, upload glitch — report it directly and we'll look into it.</p>
+          <button type="button" class="contact-link report-issue-link">Report an Issue &rarr;</button>
+        </div>
       </div>
 
       <h2>What to include in your email</h2>
@@ -131,6 +136,7 @@
           <a href="./terms-of-service.html">Terms of Service</a>
           <a href="./refund-policy.html">Refund &amp; Cancellation</a>
           <a href="./contact.html">Contact Support</a>
+          <button type="button" class="footer-link-btn report-issue-link">Report an Issue</button>
           <span class="app-footer-trust">&#128274; Secure PDF Export</span>
         </div>
       </div>
@@ -144,9 +150,11 @@
 
   <script type="module">
     import { initThemeToggle, initBackToTop, initFooterYear } from "../src/theme.js";
+    import { initReportIssueModal } from "../src/report-issue.js";
     initThemeToggle();
     initBackToTop();
     initFooterYear();
+    initReportIssueModal();
   </script>
 </body>
 </html>

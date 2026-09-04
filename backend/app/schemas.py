@@ -54,7 +54,12 @@ class OrderCreateRequest(BaseModel):
     # frontend (frontend/src/api.js) already sends `schema: {...}` in the
     # request body and doesn't need to change.
     schema_snapshot: Optional[SchemaSnapshot] = Field(default=None, alias="schema")
-    amount_paise: int = Field(gt=0, description="Amount in smallest currency unit (e.g. paise)")
+    # DEPRECATED / IGNORED: kept optional so older frontend builds that
+    # still send this don't break, but the value is never used — the
+    # server decides the real price from settings.PRODUCT_PRICE_PAISE
+    # (see routers/orders.py). Never resurrect this as the source of
+    # truth for price; a client-supplied amount is trivially tamperable.
+    amount_paise: Optional[int] = Field(default=None, gt=0, description="Ignored — server sets the real price.")
     currency: str = Field(default="INR", min_length=3, max_length=3)
 
     model_config = ConfigDict(populate_by_name=True)
@@ -76,6 +81,13 @@ class OrderStatusResponse(BaseModel):
     status: OrderStatus
     created_at: datetime
     paid_at: Optional[datetime] = None
+    # Populated once status == COMPLETED, so the frontend can show a
+    # "Download now" button directly on the success page instead of
+    # depending entirely on the email arriving (and being seen, and not
+    # landing in spam). Email remains a backup delivery channel, not the
+    # only one.
+    download_url: Optional[str] = None
+    download_expires_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 

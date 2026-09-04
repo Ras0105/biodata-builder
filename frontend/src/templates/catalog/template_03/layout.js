@@ -1,5 +1,7 @@
 // layout.js — template_03 (Royal Maroon)
 // Pure rendering: (formData) -> HTML string. Independent of every other template.
+// The invocation/logo + border are now the actual background artwork
+// (see style.css) — this file only places data inside that frame.
 
 import { schema } from "./schema.js";
 
@@ -38,10 +40,6 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template03">
-      <div class="bd03-border-top"></div>
-
-      <div class="bd03-invocation">श्री गणेशाय नमः</div>
-
       <div class="bd03-top-row">
         <div class="bd03-top-left">
           ${sectionTitle(personal?.title)}
@@ -69,7 +67,5 @@ export function render(formData, liveSchema) {
       <div class="bd03-section">
         ${(contact?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
       </div>
-
-      <div class="bd03-border-bottom"></div>
     </div>`;
 }

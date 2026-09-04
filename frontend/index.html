@@ -103,8 +103,16 @@
       </section>
 
       <div class="gallery-heading" id="galleryHeading">
-        <h2>Choose a template</h2>
-        <p class="gallery-subtitle">Pick a style, fill in your details, preview live, then download.</p>
+        <div class="gallery-heading-text">
+          <h2>Choose a template</h2>
+          <p class="gallery-subtitle">Pick a style, fill in your details, preview live, then download.</p>
+        </div>
+        <button type="button" id="browseScrollBtn" class="browse-scroll-btn" aria-label="Scroll to discover all templates">
+          <span class="browse-scroll-label">Scroll for more</span>
+          <span class="browse-scroll-arrow" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15"/><path d="M6 14l6 6 6-6"/></svg>
+          </span>
+        </button>
       </div>
       <div id="galleryGrid"></div>
 
@@ -171,18 +179,34 @@
     <section id="view-builder" hidden>
       <div class="top-actions">
         <div class="top-actions-left">
-          <button type="button" id="backBtn" class="btn btn-secondary">&larr; Back to templates</button>
-          <button type="button" id="restartBtn" class="btn btn-secondary btn-danger-outline">&#8635; Start over</button>
+          <button type="button" id="backBtn" class="btn btn-secondary" title="Back to templates">
+            <span class="btn-icon" aria-hidden="true">&larr;</span><span class="btn-label">Back to templates</span>
+          </button>
+          <button type="button" id="restartBtn" class="btn btn-secondary btn-danger-outline" title="Start over">
+            <span class="btn-icon" aria-hidden="true">&#8635;</span><span class="btn-label">Start over</span>
+          </button>
+          <a href="legal/contact.html" target="_blank" rel="noopener" class="btn btn-secondary builder-help-btn" title="Need help?">
+            <span class="btn-icon" aria-hidden="true">&#10067;</span><span class="btn-label">Need help?</span>
+          </a>
         </div>
         <div class="top-actions-right">
-          <div id="downloadBlockReason" class="field-error download-block-reason"></div>
-          <div class="checkout-consent">
-            By clicking "Pay &amp; Download" you agree to our
-            <a href="legal/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a>
-            and <a href="legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
-          </div>
-          <button type="button" id="shareBtn" class="btn btn-secondary">Share preview</button>
+          <button type="button" id="previewFullscreenBtnDesktop" class="btn btn-secondary preview-fullscreen-btn-desktop" title="View full screen" aria-label="View full screen">
+            <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg></span>
+            <span class="btn-label">Full screen</span>
+          </button>
+          <button type="button" id="shareBtn" class="btn btn-secondary" title="Share preview">
+            <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg></span>
+            <span class="btn-label">Share preview</span>
+          </button>
           <button type="button" id="downloadBtn" class="btn">Pay &amp; Download</button>
+        </div>
+      </div>
+      <div class="top-actions-footer">
+        <div id="downloadBlockReason" class="field-error download-block-reason"></div>
+        <div class="checkout-consent">
+          By clicking "Pay &amp; Download" you agree to our
+          <a href="legal/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a>
+          and <a href="legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
         </div>
       </div>
 
@@ -292,6 +316,7 @@
           <a href="legal/terms-of-service.html">Terms of Service</a>
           <a href="legal/refund-policy.html">Refund &amp; Cancellation</a>
           <a href="legal/contact.html">Contact Support</a>
+          <button type="button" class="footer-link-btn report-issue-link">Report an Issue</button>
           <span class="app-footer-trust">&#128274; Secure PDF Export</span>
         </div>
       </div>
@@ -316,5 +341,9 @@
     var fy = document.getElementById("footerYear");
     if (fy) fy.textContent = new Date().getFullYear();
   </script>
+
+  <button type="button" class="floating-help-btn report-issue-link-confirm" aria-label="Report an issue">
+    <span class="floating-help-icon">&#10067;</span><span class="floating-help-label">Report an Issue</span>
+  </button>
 </body>
 </html>

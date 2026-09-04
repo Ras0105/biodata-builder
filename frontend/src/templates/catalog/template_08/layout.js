@@ -39,20 +39,15 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template08">
-      <div class="bd08-emblem">&#10013;</div>
+      <div class="bd08-photo-wrap">
+        ${photoSrc
+          ? `<img class="bd08-photo" src="${photoSrc}" alt="Photo" />`
+          : `<div class="bd08-photo bd08-photo-placeholder">Photo</div>`}
+      </div>
 
-      <div class="bd08-top-row">
-        <div class="bd08-top-left">
-          ${sectionTitle(personal?.title)}
-          <div class="bd08-section bd08-section-single">
-            ${(personal?.fields || []).slice(0, 8).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
-          </div>
-        </div>
-        <div class="bd08-photo-wrap">
-          ${photoSrc
-            ? `<img class="bd08-photo" src="${photoSrc}" alt="Photo" />`
-            : `<div class="bd08-photo bd08-photo-placeholder">Photo</div>`}
-        </div>
+      ${sectionTitle(personal?.title)}
+      <div class="bd08-section bd08-section-single">
+        ${(personal?.fields || []).slice(0, 8).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
       </div>
 
       <div class="bd08-section bd08-section-single">

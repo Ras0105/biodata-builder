@@ -35,7 +35,6 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template07">
-      <div class="bd07-emblem">&#10013;</div>
       <div class="bd07-motto">Praise the Lord</div>
 
       <div class="bd07-top-row">
@@ -46,9 +45,11 @@ export function render(formData, liveSchema) {
           </div>
         </div>
         <div class="bd07-photo-wrap">
-          ${photoSrc
-            ? `<img class="bd07-photo" src="${photoSrc}" alt="Photo" />`
-            : `<div class="bd07-photo bd07-photo-placeholder">Photo</div>`}
+          <div class="bd07-photo-frame">
+            ${photoSrc
+              ? `<img class="bd07-photo" src="${photoSrc}" alt="Photo" />`
+              : `<div class="bd07-photo bd07-photo-placeholder">Photo</div>`}
+          </div>
         </div>
       </div>
 

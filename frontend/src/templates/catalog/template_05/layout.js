@@ -26,6 +26,21 @@ function row(label, value) {
     </div>`;
 }
 
+// Renders a section's fields as two columns (first half left, second half
+// right) with a vertical divider and a lotus mark between them — matches
+// the reference's Family/Contact partition line.
+function twoColSection(fields, formatted) {
+  const mid = Math.ceil(formatted.length / 2);
+  const left = formatted.slice(0, mid);
+  const right = formatted.slice(mid);
+  return `
+    <div class="bd05-section bd05-section-pair">
+      <div class="bd05-col">${left.join("")}</div>
+      <div class="bd05-divider"></div>
+      <div class="bd05-col">${right.join("")}</div>
+    </div>`;
+}
+
 function sectionTitle(title) {
   return `<h2 class="bd05-section-title">${esc(title)}</h2>`;
 }
@@ -39,16 +54,6 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template05">
-      <div class="bd05-corner bd05-corner-tl"></div>
-      <div class="bd05-corner bd05-corner-tr"></div>
-      <div class="bd05-corner bd05-corner-bl"></div>
-      <div class="bd05-corner bd05-corner-br"></div>
-
-      <div class="bd05-title-row">
-        <div class="bd05-title">Biodata</div>
-        <div class="bd05-title-arabic">&#65275;&#65268;&#65198;&#65235;&#65166;&#65254;&#65170;&#65268;&#65198;&#65235;&#65170;&#65166; &#65251;&#65170;&#65256;&#65166;</div>
-      </div>
-
       <div class="bd05-top-row">
         <div class="bd05-top-left">
           ${sectionTitle(personal?.title)}
@@ -68,13 +73,9 @@ export function render(formData, liveSchema) {
       </div>
 
       ${sectionTitle(family?.title)}
-      <div class="bd05-section">
-        ${(family?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
-      </div>
+      ${twoColSection(family?.fields, (family?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))))}
 
       ${sectionTitle(contact?.title)}
-      <div class="bd05-section">
-        ${(contact?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))).join("")}
-      </div>
+      ${twoColSection(contact?.fields, (contact?.fields || []).map((f) => row(f.label, fmt(f, formData[f.id]))))}
     </div>`;
 }

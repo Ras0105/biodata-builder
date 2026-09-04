@@ -37,18 +37,6 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template01">
-      <!-- Vasudhara / Aipan Bel border strips -->
-      <div class="bd-edge bd-edge-top"></div>
-      <div class="bd-edge bd-edge-bottom"></div>
-      <div class="bd-edge bd-edge-left"></div>
-      <div class="bd-edge bd-edge-right"></div>
-
-      <!-- Aipan rosette corners -->
-      <div class="bd-corner bd-corner-tl"></div>
-      <div class="bd-corner bd-corner-tr"></div>
-      <div class="bd-corner bd-corner-bl"></div>
-      <div class="bd-corner bd-corner-br"></div>
-
       <div class="bd-content">
         <!-- Circular Photo Frame -->
         <div class="bd-photo-wrap">

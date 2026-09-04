@@ -39,9 +39,6 @@ export function render(formData, liveSchema) {
 
   return `
     <div class="bd-template bd-template04">
-      <div class="bd04-icon">&#9789;</div>
-      <div class="bd04-invocation">Bismillah-ir-Rahman-ir-Rahim</div>
-
       <div class="bd04-top-row">
         <div class="bd04-top-left">
           ${sectionTitle(personal?.title)}

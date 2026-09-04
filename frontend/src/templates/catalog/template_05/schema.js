@@ -23,7 +23,7 @@ export const schema = {
             { id: "height", label: "Height", type: "text" },
             { id: "placeOfBirth", label: "Place of Birth", type: "text" },
             { id: "religion", label: "Religion", type: "text" },
-            { id: "community", label: "Community", type: "text", placeholder: "e.g. Sunni" },
+            { id: "community", label: "Community", type: "text", placeholder: "e.g. Brahmin" },
             { id: "familyLineage", label: "Family Lineage", type: "text" },
             { id: "complexion", label: "Complexion", type: "text" },
             { id: "bloodGroup", label: "Blood Group", type: "text" },

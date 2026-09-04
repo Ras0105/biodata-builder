@@ -6,4 +6,4 @@
 # actual per-template layout/schema/style all live in the frontend catalog
 # and are read directly from there at render time (see render/render.mjs),
 # so this list is the ONE place to update if templates are ever renumbered.
-VALID_TEMPLATE_IDS = {f"template_{i:02d}" for i in range(1, 25)}
+VALID_TEMPLATE_IDS = {f"template_{i:02d}" for i in range(1, 30)}

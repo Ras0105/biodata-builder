@@ -1,7 +1,9 @@
 # app/routers/orders.py
+import logging
 import uuid
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -12,18 +14,14 @@ from app.schemas import (
     OrderCreateResponse,
     OrderStatusResponse,
 )
-from app.services.payment import create_razorpay_order
+from app.services.payment import create_razorpay_order, fetch_order_payments, PaymentOrderError
+from app.services.pdf_pipeline import generate_and_deliver_pdf
+from app.services.storage import build_download_link
 from app.templates_registry import VALID_TEMPLATE_IDS
 
 router = APIRouter(prefix="/api", tags=["orders"])
 settings = get_settings()
-
-# Basic sanity bound — stops obviously wrong amounts (e.g. a client bug
-# sending amount in rupees instead of paise) from creating a bogus order.
-# Adjust to match your actual product price(s) if you ever price templates
-# differently from one another.
-MIN_AMOUNT_PAISE = 100          # ₹1
-MAX_AMOUNT_PAISE = 10_00_00     # ₹1,000
+logger = logging.getLogger("biodata_builder")
 
 
 @router.post("/create-order", response_model=OrderCreateResponse)
@@ -35,10 +33,14 @@ def create_order(payload: OrderCreateRequest, db: Session = Depends(get_db)):
     open Razorpay's checkout widget — actual payment confirmation only
     ever comes from the webhook, never from this endpoint or anything the
     client reports back.
-    """
-    if not (MIN_AMOUNT_PAISE <= payload.amount_paise <= MAX_AMOUNT_PAISE):
-        raise HTTPException(status_code=400, detail="Invalid amount")
 
+    Price is intentionally NOT taken from the request. It used to be
+    (payload.amount_paise), but that let anyone paying via a modified
+    frontend, devtools, or a raw curl request set their own price within
+    the old ₹1–₹1,000 sanity range. settings.PRODUCT_PRICE_PAISE is the
+    single source of truth for what gets charged; whatever the client
+    sends for amount_paise is ignored.
+    """
     if payload.template_id not in VALID_TEMPLATE_IDS:
         raise HTTPException(status_code=400, detail="Unknown template_id")
 
@@ -51,7 +53,7 @@ def create_order(payload: OrderCreateRequest, db: Session = Depends(get_db)):
         template_id=payload.template_id,
         biodata_data=payload.form_data,
         schema_snapshot=payload.schema_snapshot.model_dump() if payload.schema_snapshot else None,
-        amount_paise=payload.amount_paise,
+        amount_paise=settings.PRODUCT_PRICE_PAISE,
         currency=payload.currency,
         status=OrderStatus.PENDING,
     )
@@ -82,19 +84,73 @@ def create_order(payload: OrderCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/order/{order_id}/status", response_model=OrderStatusResponse)
-def get_order_status(order_id: str, db: Session = Depends(get_db)):
+def get_order_status(order_id: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Lets the frontend poll after checkout closes, in case the webhook
     hasn't landed yet (Razorpay webhooks are usually near-instant but
     aren't guaranteed synchronous with the checkout redirect).
+
+    Self-healing reconciliation: if the order is still PENDING, the webhook
+    may simply never have arrived at all (wrong URL configured in Razorpay's
+    dashboard, transient outage, etc — this is exactly what happened in
+    production on 21 Aug 2026). Rather than leaving the customer's payment
+    stuck forever with no PDF and no automatic recourse, piggyback a direct
+    check against Razorpay's own API here — the frontend is already calling
+    this endpoint every few seconds right after checkout, so this recovers
+    the order without needing a separate cron job or any new infrastructure.
     """
     order = db.get(Order, order_id)
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
+
+    if order.status == OrderStatus.PENDING and order.razorpay_order_id:
+        try:
+            payments = fetch_order_payments(order.razorpay_order_id)
+            captured = next(
+                (p for p in payments.get("items", []) if p.get("status") == "captured"),
+                None,
+            )
+        except PaymentOrderError:
+            logger.exception("Reconciliation check failed for order %s — will retry on next poll", order.id)
+            captured = None
+
+        if captured:
+            # Same amount-match safety net as the webhook path (see
+            # webhooks.py) — never mark paid on a mismatched amount, even
+            # via this fallback route.
+            if captured.get("amount") == order.amount_paise:
+                order.status = OrderStatus.PAID
+                order.razorpay_payment_id = captured.get("id")
+                order.paid_at = datetime.now(timezone.utc)
+                db.commit()
+                db.refresh(order)
+                background_tasks.add_task(generate_and_deliver_pdf, order.id)
+                logger.warning(
+                    "Order %s recovered via status-poll reconciliation — webhook was likely missed (payment_id=%s)",
+                    order.id, captured.get("id"),
+                )
+            else:
+                logger.critical(
+                    "AMOUNT MISMATCH during status-poll reconciliation on order %s: captured=%s expected=%s (payment_id=%s) — NOT marking as paid",
+                    order.id, captured.get("amount"), order.amount_paise, captured.get("id"),
+                )
+
+    download_url = None
+    download_expires_at = None
+    if order.status == OrderStatus.COMPLETED and order.generated_pdf:
+        pdf = order.generated_pdf
+        # Same "not expired" check as the download route itself (see
+        # downloads.py) — no point handing back a link that will just
+        # 410 the moment they click it.
+        if pdf.token_expires_at > datetime.now(timezone.utc):
+            download_url = build_download_link(settings.BACKEND_URL, pdf.download_token)
+            download_expires_at = pdf.token_expires_at
 
     return OrderStatusResponse(
         order_id=order.id,
         status=order.status,
         created_at=order.created_at,
         paid_at=order.paid_at,
+        download_url=download_url,
+        download_expires_at=download_expires_at,
     )

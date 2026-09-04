@@ -6,6 +6,7 @@
 // editing when the catalog changes.
 
 import { TEMPLATE_REGISTRY, getCategories, listCategories } from "../templates/registry.js";
+import { openPreferenceForm } from "../preference-form.js";
 
 let activeCategory = "All";
 
@@ -72,6 +73,33 @@ export function renderGallery(container, onSelect) {
     card.querySelector(".template-card-thumb").addEventListener("click", () => onSelect(meta.id));
     grid.appendChild(card);
   });
+
+  // Extra "more coming soon" card — same size/shape as a real template
+  // card so it lines up in the grid, but instead of a preview it invites
+  // the visitor to tell us what kind of biodata design they want.
+  const comingSoon = document.createElement("div");
+  comingSoon.className = "template-card template-card-coming-soon";
+  comingSoon.innerHTML = `
+    <div class="template-card-thumb template-card-thumb-coming-soon">
+      <span class="coming-soon-icon" aria-hidden="true">&#10024;</span>
+      <span class="coming-soon-label">More templates coming soon</span>
+    </div>
+    <div class="template-card-body">
+      <div class="template-card-name">New designs are on the way</div>
+      <div class="template-card-desc">
+        We're adding fresh biodata templates every few weeks. Don't see a style
+        that fits you yet? Let us know what you'd like, and we'll try to add it.
+      </div>
+      <button type="button" class="btn btn-primary preference-form-link">Request a Template</button>
+    </div>
+  `;
+  comingSoon
+    .querySelector(".preference-form-link")
+    .addEventListener("click", (e) => {
+      e.preventDefault();
+      openPreferenceForm();
+    });
+  grid.appendChild(comingSoon);
 
   container.appendChild(grid);
 }

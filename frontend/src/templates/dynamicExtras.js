@@ -219,7 +219,7 @@ function continuationPageHtml(theme, pageNumber, totalPages, photos, sections, f
   return `
     <div class="bd-cont-page" style="
       position:relative;width:${PAGE_WIDTH}px;min-height:${PAGE_MIN_HEIGHT}px;margin:0 auto;
-      box-sizing:border-box;padding:56px 60px;background:${theme.bg};color:${theme.text};
+      box-sizing:border-box;padding:${theme.contPadding || "56px 60px"};background:${theme.bg};color:${theme.text};
       font-family:${theme.font};${borderCss}
     ">
       <div style="position:absolute;top:22px;right:28px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;">

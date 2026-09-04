@@ -2,10 +2,12 @@ import { getTemplateMeta, getCategories } from "./templates/registry.js";
 import { renderGallery, setActiveCategory } from "./components/templateGallery.js";
 import { renderForm, getMissingRequiredFields } from "./components/formRenderer.js";
 import { renderPreview } from "./components/livePreview.js";
-import { startCheckout } from "./components/checkout.js";
+import { startCheckout, resumePendingOrderIfAny } from "./components/checkout.js";
 import { shareCurrentPreview } from "./components/sharePreview.js";
 import { calculateAge, findDobFieldId } from "./templates/schemaUtils.js";
 import { initBackToTop } from "./theme.js";
+import { initReportIssueModal, openReportIssueConfirm } from "./report-issue.js";
+import { initPreferenceFormModal } from "./preference-form.js";
 import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
@@ -140,6 +142,7 @@ const galleryGrid = document.getElementById("galleryGrid");
 const formMount = document.getElementById("formMount");
 const previewMount = document.getElementById("previewMount");
 const previewFullscreenBtn = document.getElementById("previewFullscreenBtn");
+const previewFullscreenBtnDesktop = document.getElementById("previewFullscreenBtnDesktop");
 const previewFullscreenClose = document.getElementById("previewFullscreenClose");
 const previewFullscreenEl = document.getElementById("previewFullscreen");
 const previewFullscreenBody = document.getElementById("previewFullscreenBody");
@@ -198,12 +201,66 @@ const overlayEl = document.getElementById("overlay");
 const overlayTextEl = document.getElementById("overlayText");
 const overlay = {
   show: (msg) => { overlayTextEl.textContent = msg; overlayEl.hidden = false; },
+  // Shown once the order is COMPLETED and the backend has handed back a
+  // download_url (see api.js/checkout.js). We no longer make the customer
+  // wait on email as the only way to get their file — this renders a
+  // visible "Download again" link right in the overlay as a fallback in
+  // case the automatic download (triggered separately, see checkout.js)
+  // got blocked by the browser or was missed.
+  showDownload: (msg, downloadUrl) => {
+    overlayTextEl.textContent = "";
+    const msgEl = document.createElement("div");
+    msgEl.textContent = msg;
+    overlayTextEl.appendChild(msgEl);
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = "";
+    link.textContent = "Download your biodata";
+    link.className = "overlay-download-link";
+    // Without this, the click bubbles to overlayEl's own listener below and
+    // the overlay closes at the same instant the browser is trying to
+    // start the download — stopPropagation keeps the two independent.
+    link.addEventListener("click", (e) => e.stopPropagation());
+    overlayTextEl.appendChild(link);
+
+    overlayEl.hidden = false;
+  },
   hide: () => { overlayEl.hidden = true; },
   fail: (msg) => { overlay.hide(); alert(msg); },
+  // Like fail(), but for problems the customer can't just retry their way
+  // out of (payment failures, stuck generation) — a plain alert() is a dead
+  // end with nowhere to go next. This keeps the overlay open with the
+  // message plus a direct link to the "Report an Issue" form, so there's
+  // always a next step instead of just "OK" and back to a confusing screen.
+  failWithHelp: (msg) => {
+    overlayTextEl.textContent = "";
+    const msgEl = document.createElement("div");
+    msgEl.textContent = msg;
+    overlayTextEl.appendChild(msgEl);
+
+    const link = document.createElement("button");
+    link.type = "button";
+    link.textContent = "Report this issue";
+    link.className = "overlay-download-link report-issue-link";
+    link.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openReportIssueConfirm();
+    });
+    overlayTextEl.appendChild(link);
+
+    overlayEl.hidden = false;
+  },
 };
 // Let the user tap/click the overlay to dismiss it right away, instead of
 // being forced to wait out whatever auto-hide timer the caller set.
 overlayEl.addEventListener("click", () => overlay.hide());
+
+// If the customer paid and then refreshed/reopened the tab before the order
+// finished processing, this resumes tracking that order automatically
+// instead of leaving them with no feedback and no way to check (see
+// checkout.js for the full explanation).
+resumePendingOrderIfAny(overlay);
 
 // --- Full-screen preview: on mobile the sticky top-actions bar (Back/Start
 // over/Share/Pay) eats a lot of vertical space and crowds out the actual
@@ -236,6 +293,7 @@ function closePreviewFullscreen() {
   requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
 }
 previewFullscreenBtn?.addEventListener("click", openPreviewFullscreen);
+previewFullscreenBtnDesktop?.addEventListener("click", openPreviewFullscreen);
 previewFullscreenClose?.addEventListener("click", closePreviewFullscreen);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePreviewFullscreen();
@@ -331,6 +389,13 @@ async function onSelectTemplate(templateId, { updateHash = true } = {}) {
   const { schema } = await meta.loadSchema();
   selectTemplate(templateId, schema);
   showView();
+  // Issue: opening a template from further down the gallery kept the
+  // browser's existing scroll position, so the builder view appeared
+  // "already scrolled" — the sticky top-actions bar could even land over
+  // the template's photo box. Always reset to the very top of the page
+  // when entering the builder so header + top-actions + full template are
+  // visible from the start.
+  window.scrollTo(0, 0);
 
   fullNameInput.value = state.fullName;
   emailInput.value = state.email;
@@ -362,6 +427,7 @@ countryCodeSelect.addEventListener("change", (e) => {
 backBtn.addEventListener("click", () => {
   backToGallery();
   showView();
+  window.scrollTo(0, 0);
   history.pushState(null, "", location.pathname);
 });
 
@@ -454,7 +520,76 @@ if (catParam) setActiveCategory(catParam);
 
 renderGallery(galleryGrid, (id) => onSelectTemplate(id));
 routeFromHash(); // handles initial load, including a refresh mid-builder
+initReportIssueModal(); // wires up all .report-issue-link / .report-issue-link-confirm elements on this page
+initPreferenceFormModal(); // wires up any static .preference-form-link elements (gallery card wires its own dynamically)
 
 if (catParam) {
   document.getElementById("galleryGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+// ---- "Browse All Templates" slow scroll ----
+// A controlled, slow-paced auto-scroll from the top of the gallery grid to
+// its bottom, so the person can watch templates go by without manually
+// dragging the scrollbar. Cancels itself the moment the person scrolls,
+// clicks, or touches the page — we don't want to fight their input.
+const browseScrollBtn = document.getElementById("browseScrollBtn");
+let scrollAnimFrame = null;
+
+function cancelSlowScroll() {
+  if (scrollAnimFrame !== null) {
+    cancelAnimationFrame(scrollAnimFrame);
+    scrollAnimFrame = null;
+    browseScrollBtn?.classList.remove("is-active");
+  }
+}
+
+function startSlowScrollThroughGallery() {
+  const grid = document.getElementById("galleryGrid");
+  if (!grid) return;
+
+  cancelSlowScroll(); // in case it was already running from a previous click
+
+  const startY = window.scrollY;
+  const gridRect = grid.getBoundingClientRect();
+  // Scroll until the bottom of the grid is roughly at the bottom of the
+  // viewport, so every card scrolls into view at least once.
+  const targetY = startY + gridRect.bottom - window.innerHeight + 24;
+  const distance = targetY - startY;
+  if (distance <= 0) return; // already at/past the bottom, nothing to do
+
+  // Slow and steady: ~90px per second, but never shorter than 4s or
+  // longer than 18s even for a very long gallery.
+  const duration = Math.min(18000, Math.max(4000, (distance / 90) * 1000));
+  const startTime = performance.now();
+  browseScrollBtn?.classList.add("is-active");
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / duration);
+    // easeInOutSine — gentle start and finish, steady in the middle.
+    const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
+    window.scrollTo(0, startY + distance * eased);
+
+    if (progress < 1) {
+      scrollAnimFrame = requestAnimationFrame(step);
+    } else {
+      scrollAnimFrame = null;
+      browseScrollBtn?.classList.remove("is-active");
+    }
+  }
+  scrollAnimFrame = requestAnimationFrame(step);
+}
+
+browseScrollBtn?.addEventListener("click", () => {
+  if (scrollAnimFrame !== null) {
+    cancelSlowScroll(); // clicking again while running just stops it
+  } else {
+    startSlowScrollThroughGallery();
+  }
+});
+
+// Any manual scroll/touch/wheel input from the person cancels the
+// auto-scroll immediately, so it never fights their own scrolling.
+["wheel", "touchstart", "keydown"].forEach((evt) => {
+  window.addEventListener(evt, cancelSlowScroll, { passive: true });
+});

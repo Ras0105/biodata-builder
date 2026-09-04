@@ -600,10 +600,84 @@ body {
 }
 .template-card-body .btn-primary { margin-top: 10px; }
 
+/* ---- "More templates coming soon" card ---- */
+.template-card-coming-soon {
+  border-style: dashed;
+}
+.template-card-thumb-coming-soon {
+  background: linear-gradient(160deg, var(--accent-soft), var(--surface-muted));
+  flex-direction: column;
+  gap: 10px;
+  cursor: default;
+  text-align: center;
+  padding: 24px;
+}
+.coming-soon-icon { font-size: 30px; line-height: 1; }
+.coming-soon-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+.template-card-coming-soon .template-card-desc { -webkit-line-clamp: 4; }
+
+/* ---- Preference form — small in-page window (not a full-page overlay) ---- */
+.preference-form-modal[hidden] { display: none; }
+.preference-form-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.preference-form-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.preference-form-window {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: min(640px, 90vh);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.preference-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.preference-form-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 0 4px;
+}
+.preference-form-close:hover { color: var(--text); }
+.preference-form-body { flex: 1; min-height: 0; }
+.preference-form-body iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
 /* ---- Builder ---- */
 .builder-layout {
   display: grid;
-  grid-template-columns: 460px 1fr;
+  grid-template-columns: 460px minmax(0, 1fr);
   gap: 36px;
   align-items: start;
 }
@@ -625,6 +699,10 @@ body {
   background: var(--surface-muted);
   padding: 16px 18px 18px;
   margin: 0 0 18px;
+  min-width: 0; /* <fieldset> ignores flex/grid shrinking by default in
+    every major browser and instead sizes to its content's min-content —
+    without this override it was the one still forcing the page ~70px
+    wider than the screen even after the grid-track fix above. */
 }
 .form-section legend { font-weight: 700; font-size: 14.5px; margin-bottom: 12px; padding: 0 2px; color: var(--text); }
 .form-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
@@ -656,18 +734,17 @@ body {
   color: var(--text-muted);
 }
 .form-field input[type="file"]::file-selector-button,
-.form-field input[type="file"]::-webkit-file-upload-button {
-  padding: 7px 14px;
-  margin-right: 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface-muted);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
+.form-field input[type="file"] {
+  padding: 8px 4px;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: none;
 }
 .form-field input[type="file"]::file-selector-button:hover,
 .form-field input[type="file"]::-webkit-file-upload-button:hover {
@@ -685,9 +762,9 @@ body {
 }
 .preview-scale { transform-origin: top center; max-width: 100%; }
 
-/* ---- "View full screen" trigger above the preview ---- */
+/* ---- "View full screen" trigger above the preview (mobile) ---- */
 .preview-fullscreen-btn {
-  display: none; /* only shown on mobile, see media query — desktop already has room */
+  display: none; /* only shown on mobile — desktop uses the icon button in the top action bar instead, see .preview-fullscreen-btn-desktop */
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -703,6 +780,13 @@ body {
   cursor: pointer;
 }
 .preview-fullscreen-btn:hover { border-color: var(--gold); }
+
+/* ---- "View full screen" trigger in the top action bar (desktop) ---- */
+.preview-fullscreen-btn-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 /* ---- Full-screen preview modal: takes over the whole viewport so the
    template can be seen without the sticky top-actions bar / form getting
@@ -813,22 +897,53 @@ body {
   top: 66px;
   z-index: 40;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* the button row itself never wraps to a 2nd line — see .top-actions-footer for the consent/error text, which lives outside this row now */
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin: 0 -32px 20px;
+  margin: 0 -32px 0;
   padding: 12px 32px;
   background: var(--bg);
   border-bottom: 1px solid var(--border-soft);
   box-shadow: 0 6px 16px -12px var(--shadow-color);
+  overflow-x: auto; /* safety net: if a viewport is too narrow to fit every icon, the
+    row scrolls horizontally instead of wrapping to a second line */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
-.top-actions-left, .top-actions-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top-actions-left, .top-actions-right { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; flex-shrink: 0; }
 .top-actions-right { justify-content: flex-end; margin-left: auto; }
-.download-block-reason { margin-top: 0; text-align: right; max-width: 260px; }
-.checkout-consent { font-size: 12px; line-height: 1.5; color: var(--muted, #64748b); text-align: right; max-width: 260px; }
+.builder-help-btn { font-size: 13px; padding: 8px 14px; opacity: 0.85; text-decoration: none; display: inline-flex; }
+.builder-help-btn:hover { opacity: 1; }
+
+/* Consent text + any download-block error now live in their own full-width
+   row below the button bar (.top-actions-footer), so they can never force
+   the icon row above to wrap onto a second line. */
+.top-actions-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 6px -32px 20px;
+  padding: 0 32px;
+}
+.download-block-reason { margin-top: 0; text-align: right; max-width: 320px; }
+.checkout-consent { font-size: 12px; line-height: 1.5; color: var(--muted, #64748b); text-align: right; max-width: 320px; }
 .checkout-consent a { color: inherit; text-decoration: underline; }
 .checkout-consent a:hover { color: var(--gold); }
+
+/* Icon + label buttons in the builder's top action bar. On desktop both
+   show; below the icon-toolbar breakpoint the label is visually hidden
+   (kept for screen readers) and the native `title` attribute gives a
+   hover/long-press tooltip, so each button collapses to a compact circle. */
+.top-actions .btn, .top-actions-left .btn, .top-actions-right .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.top-actions .btn-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
+.top-actions .btn-label { white-space: nowrap; }
 
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -836,14 +951,39 @@ body {
 }
 .overlay[hidden] { display: none; }
 
+.overlay-download-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: var(--gold, #8a5a2b);
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  border: none; /* also used on a <button> now (main.js failWithHelp), which has a default browser border otherwise */
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 
-/* ---- Responsive builder layout ---- */
-@media (max-width: 960px) {
+/* ---- Responsive builder layout ----
+   Bumped from 960px to 1200px: the form column is a fixed 460px, so right
+   above the old 960px cutoff (e.g. ~961-1150px) the preview column was only
+   getting ~400-500px of a 900+px-wide document, which made the live preview
+   look cramped/broken. Stacking (form on top, preview below, full width)
+   kicks in earlier now so the preview always has enough room to render
+   cleanly, same as the mobile layout. */
+@media (max-width: 1200px) {
   .container { padding: 16px; }
 
   .builder-layout {
-    grid-template-columns: 1fr; /* stack form above preview */
+    grid-template-columns: minmax(0, 1fr); /* stack form above preview; minmax(0,_) lets the
+      column actually shrink to the viewport instead of growing to fit its
+      widest un-shrinkable content (the default grid-item min-width:auto
+      behavior), which is what was pushing the whole page ~90px wider than
+      the screen and leaving that blank strip on the right. */
     gap: 20px;
   }
 
@@ -860,7 +1000,10 @@ body {
     order: 2; /* form first, preview below on mobile */
   }
 
+  /* On mobile, use the full-width button above the preview instead of the
+     icon button in the (already crowded) top action bar. */
   .preview-fullscreen-btn { display: flex; }
+  .preview-fullscreen-btn-desktop { display: none; }
 
   .preview-scale {
     transform: none; /* let JS-driven width scaling take over, see main.js */
@@ -873,11 +1016,71 @@ body {
     grid-template-columns: 1fr; /* stack full name / email */
   }
 
-  .top-actions { margin: 0 -16px 20px; padding: 10px 16px; flex-direction: column; align-items: stretch; gap: 10px; }
-  .top-actions-left, .top-actions-right { justify-content: stretch; }
-  .top-actions-left .btn, .top-actions-right .btn { flex: 1 1 auto; }
-  .download-block-reason { text-align: left; max-width: none; flex-basis: 100%; }
-  .checkout-consent { text-align: left; max-width: none; flex-basis: 100%; }
+  /* Compact icon toolbar: Back / Start over / Need help / Share collapse to
+     small round icon buttons (label hidden, tooltip on long-press/hover) so
+     the whole row takes one short line instead of stacking to several full-
+     width rows. Pay & Download stays a full, clearly-labelled button since
+     it's the primary action. */
+  /* Sticky top-actions is a desktop convenience (keeps Pay & Download
+     reachable in a tall two-column layout). On mobile the layout stacks
+     into one column, so a sticky bar here just floats over the Contact
+     fields / template preview as they scroll underneath it (fields get
+     hidden behind it). Let it scroll away normally instead. */
+  .top-actions {
+    position: static;
+    margin: 0 -16px 0;
+    padding: 8px 16px;
+    flex-direction: row;
+    flex-wrap: nowrap; /* one line, always — see overflow-x on the base rule for the rare
+      screen too narrow to fit every icon */
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .top-actions-left { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
+  .top-actions-right { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; margin-left: auto; }
+
+  .top-actions-left .btn,
+  .top-actions-right .preview-fullscreen-btn-desktop,
+  .top-actions-right #shareBtn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .top-actions-left .btn-label,
+  .top-actions-right .preview-fullscreen-btn-desktop .btn-label,
+  .top-actions-right #shareBtn .btn-label {
+    /* visually hidden, still readable by screen readers / still has a
+       native tooltip via the button's title attribute */
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .top-actions-left .btn-icon { font-size: 16px; }
+
+  #downloadBtn { flex: 0 0 auto; padding: 10px 16px; font-size: 13px; }
+
+  /* Consent text + any download-block error: full width, left-aligned,
+     small and unobtrusive, sitting on their own row below the icon bar. */
+  .top-actions-footer {
+    align-items: flex-start;
+    margin: 6px -16px 16px;
+    padding: 0 16px;
+  }
+  .download-block-reason, .checkout-consent { text-align: left; max-width: none; }
+  .checkout-consent { font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+  /* Smallest phones: icon row can get tight with 4 icons + Pay & Download —
+     drop Pay & Download's padding a touch further rather than wrapping. */
+  #downloadBtn { padding: 9px 12px; font-size: 12.5px; }
 }
 
 /* ---- Collapsible navbar: below this width the nav links, theme toggle
@@ -887,6 +1090,12 @@ body {
   .app-nav { display: none; }
   .app-header-actions > .btn-header-cta { display: none; }
   .nav-toggle { display: inline-flex; }
+  /* Base header padding (32px each side) was tuned for desktop's wide nav
+     links; once those collapse into the hamburger, that much side padding
+     just reads as dead space between the logo and the icon cluster on
+     mid-width phones/tablets. Tighten it so the header actually uses the
+     screen width. */
+  .app-header { padding: 12px 20px; }
 
   .mobile-menu:not([hidden]) {
     display: flex;
@@ -909,7 +1118,6 @@ body {
   .app-header .brand { font-size: 15px; gap: 8px; }
   .app-header .brand-mark { width: 32px; height: 32px; }
   .app-header .brand-sub { font-size: 9.5px; }
-  .top-actions { top: 62px; }
   .form-field input, .form-field textarea { font-size: 16px; } /* prevents iOS auto-zoom on focus */
 }
 
@@ -1379,10 +1587,36 @@ body {
   .legal-toc ol { columns: 1; }
 }
 
+/* ---- Floating "Report an Issue" button, shown on every page ---- */
+.floating-help-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--cta-bg);
+  color: var(--cta-text);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 24px var(--shadow-color);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.floating-help-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px var(--shadow-color); }
+.floating-help-btn .floating-help-icon { font-size: 15px; line-height: 1; }
+@media (max-width: 640px) {
+  .floating-help-btn { right: 14px; bottom: 14px; padding: 11px 14px; }
+  .floating-help-btn .floating-help-label { display: none; }
+}
+
 /* ---- Contact support page ---- */
 .contact-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
   margin: 24px 0 36px;
 }
@@ -1408,3 +1642,161 @@ body {
 .faq-item { border-bottom: 1px solid var(--border); padding: 16px 0; }
 .faq-item:last-child { border-bottom: none; }
 .faq-item h3 { margin: 0 0 6px; }
+
+/* ==========================================================================
+   "Report an Issue" — every trigger now goes through this same confirm
+   gate, then opens the Google Form directly in a new tab (see
+   src/report-issue.js). The old on-page iframe modal has been removed.
+   ========================================================================== */
+
+/* ---- "Are you sure?" confirm gate, shown before opening the form ---- */
+.report-issue-confirm[hidden] { display: none; }
+.report-issue-confirm { position: fixed; inset: 0; z-index: 220; display: flex; align-items: center; justify-content: center; }
+.report-issue-confirm-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+.report-issue-confirm-box {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 26px 22px;
+  max-width: 320px;
+  width: calc(100% - 40px);
+  box-shadow: 0 20px 48px var(--shadow-color);
+  text-align: center;
+}
+.report-issue-confirm-box p { margin: 0 0 20px; font-size: 15px; font-weight: 600; color: var(--text); }
+.report-issue-confirm-actions { display: flex; gap: 10px; justify-content: center; }
+.report-issue-confirm-actions .btn { flex: 1; }
+.report-issue-confirm-x {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 4px;
+}
+.report-issue-confirm-x:hover { color: var(--text); }
+
+/* ---- Button-reset for the several "Report an Issue" / "Help" triggers
+   that used to be plain <a> links and are now <button> elements (so their
+   click can be intercepted for the modal/confirm instead of navigating).
+   Each keeps its original visual class (app-nav-link, mobile-menu-link,
+   footer-link-btn, contact-link) — these rules only strip the browser's
+   default button chrome (background/border) so nothing visually changes. ---- */
+button.app-nav-link,
+button.mobile-menu-link {
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.app-nav-link { padding: 0; }
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--footer-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  width: fit-content;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-link-btn:hover { color: var(--gold); }
+
+.contact-card button.contact-link {
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+.contact-card button.contact-link:hover { text-decoration: underline; }
+
+/* ---- Move the floating "Report an Issue" button to the LEFT so it no
+   longer sits on top of .scroll-top-fab (back-to-top), which lives at
+   bottom-right (see "Floating back-to-top button" rule above). ---- */
+.floating-help-btn {
+  left: 20px;
+  right: auto;
+}
+@media (max-width: 640px) {
+  .floating-help-btn { left: 14px; right: auto; }
+}
+
+/* ---- "Browse all templates" slow-scroll button, beside the
+   "Choose a template" heading only (#galleryHeading — .gallery-heading is
+   reused by other sections like "Why Aananda Digital", so we scope to the
+   ID here rather than the shared class). ---- */
+#galleryHeading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.gallery-heading-text { display: flex; flex-direction: column; gap: 4px; }
+/* Quiet scroll hint, built from the same recipe as the hero's
+   ".hero-eyebrow" pill (thin gold outline, transparent fill, warm accent
+   text) so it reads as part of this site's own badge language instead of
+   a generic glowing SaaS button. No shouty caps, no filled circle — just
+   a small arrow that nudges down every couple seconds. */
+.browse-scroll-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  /* Shift left, away from the very edge, so it doesn't hug the corner. */
+  margin-right: 56px;
+}
+.browse-scroll-btn:hover {
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+}
+.browse-scroll-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.browse-scroll-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.browse-scroll-arrow svg { width: 14px; height: 14px; animation: browse-scroll-nudge 2s ease-in-out infinite; }
+/* While actively auto-scrolling, hold the arrow steady instead of idly
+   nudging — reads as "working" rather than "waiting to be clicked". */
+.browse-scroll-btn.is-active .browse-scroll-arrow svg { animation: none; }
+@keyframes browse-scroll-nudge {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(3px); opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .browse-scroll-arrow svg { animation: none; }
+}
+@media (max-width: 640px) {
+  .browse-scroll-btn { margin-right: 20px; padding: 7px 14px; }
+  .browse-scroll-label { font-size: 12px; }
+  .browse-scroll-arrow svg { width: 13px; height: 13px; }
+}
+
