@@ -307,6 +307,26 @@ function closePreviewFullscreen() {
 }
 previewFullscreenBtn?.addEventListener("click", openPreviewFullscreen);
 previewFullscreenBtnDesktop?.addEventListener("click", openPreviewFullscreen);
+
+// On mobile the round "view full screen" button (previewFullscreenBtn) is
+// pinned with position:fixed so it's reachable while scrolling the form.
+// The top-actions bar (Back/Start over/Need help/Share/Pay & Download) sits
+// in that same top strip though, and on mobile it's NOT sticky (scrolls
+// away normally) — so right at the top of the page, before the user has
+// scrolled past that bar, the fixed button visually lands on top of it
+// (covering Pay & Download). Fix: hide the fixed button for as long as the
+// top-actions bar is still in view, and let it fade back in once the bar
+// has scrolled out of view and there's nothing left for it to overlap.
+const topActionsBarEl = document.querySelector(".top-actions");
+if (previewFullscreenBtn && topActionsBarEl && "IntersectionObserver" in window) {
+  const topActionsVisibilityObserver = new IntersectionObserver(
+    ([entry]) => {
+      previewFullscreenBtn.classList.toggle("is-over-actions-bar", !!entry?.isIntersecting);
+    },
+    { threshold: 0 }
+  );
+  topActionsVisibilityObserver.observe(topActionsBarEl);
+}
 previewFullscreenClose?.addEventListener("click", closePreviewFullscreen);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePreviewFullscreen();

@@ -1040,6 +1040,17 @@ body {
     align-self: auto;
     border-radius: 50%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    opacity: 1;
+    transition: opacity 0.15s ease;
+  }
+  /* Toggled by an IntersectionObserver in main.js: while the top-actions
+     bar (Back/Start over/Need help/Share/Pay & Download) is still in view
+     at the top of the page, this fixed button would sit right on top of
+     it (covering Pay & Download) — so hide it until that bar has scrolled
+     out of view. */
+  .preview-fullscreen-btn.is-over-actions-bar {
+    opacity: 0;
+    pointer-events: none;
   }
   .preview-fullscreen-btn-desktop { display: none; }
 
