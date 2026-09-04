@@ -139,17 +139,25 @@ export function removePage(schema, pageId) {
 }
 
 const MAX_PHOTOS = 8;
-export function addPhoto(schema, label) {
+// Issue 3: optional targetPageId lets a photo be added directly onto a
+// specific page (e.g. the "+ Add photo to this page" button rendered under
+// each page) instead of always landing on page 1 and needing the "Add to
+// page" dropdown to move it afterward. Falls back to page 1 if the id
+// wasn't given or no longer matches a real page.
+export function addPhoto(schema, label, targetPageId) {
   if (schema.photos.length >= MAX_PHOTOS) return null;
   const extraIndex = schema.photos.length - 1; // 0-based among extra (non-primary) photos
   const col = extraIndex % 3;
   const row = Math.floor(extraIndex / 3);
+  const resolvedPageId = schema.pages.some((p) => p.id === targetPageId)
+    ? targetPageId
+    : schema.pages[0]?.id;
   const photo = {
     id: nextId("photo"),
     label: label || "Additional Photo",
     shape: "square",
     required: false,
-    page: schema.pages[0]?.id, // which page it renders on; user can move it
+    page: resolvedPageId, // which page it renders on; user can move it
     // Freeform placement on that page — user can drag/resize in the live
     // preview. Cascaded defaults so new photos don't stack on top of each other.
     x: 40 + col * 150,

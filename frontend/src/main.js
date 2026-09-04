@@ -75,6 +75,19 @@ window.addEventListener("resize", () => {
   if (window.innerWidth > 860) closeMobileMenu();
 });
 
+// --- Fixed-position "View full screen" button (mobile, builder view only):
+// its top offset must sit BELOW the sticky header, never overlapping the
+// hamburger/theme-toggle icons up there. Header height itself changes
+// across breakpoints (compact padding/logo below 860px, see style.css), so
+// it's measured here rather than hardcoded, and re-measured on resize.
+const appHeaderEl = document.querySelector(".app-header");
+function updateHeaderHeightVar() {
+  if (!appHeaderEl) return;
+  document.documentElement.style.setProperty("--header-h", `${appHeaderEl.offsetHeight}px`);
+}
+updateHeaderHeightVar();
+window.addEventListener("resize", updateHeaderHeightVar);
+
 // --- Hero logo video: two <video> tags (dark/light) sit in the DOM at once;
 // CSS shows/hides by data-theme, but only the visible one should actually
 // play, so the hidden one isn't wasting decode/battery in the background.
@@ -369,6 +382,9 @@ const formCallbacks = {
   onAddPage: () => { addPage(); rerenderAll(); },
   onRemovePage: (pageId) => { removePage(pageId); rerenderAll(); },
   onAddPhoto: () => { addPhoto(); rerenderAll(); },
+  // Issue 3: "+ Add photo to this page" — same action, but the new photo
+  // lands on THAT page immediately instead of always defaulting to page 1.
+  onAddPhotoToPage: (pageId) => { addPhoto(undefined, pageId); rerenderAll(); },
   onRemovePhoto: (photoId) => { removePhoto(photoId); rerenderAll(); },
   onMovePhoto: (photoId, pageId) => { movePhoto(photoId, pageId); rerenderAll(); },
   onPhotoStyle: (photoId, patch) => { setPhotoStyle(photoId, patch); rerenderAll(); },

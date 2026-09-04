@@ -15,7 +15,7 @@ function escAttr(str) {
 //   onAddSection(pageId, title), onRemoveSection(pageId, sectionId), onRenameSection(pageId, sectionId, title),
 //   onAddField(pageId, sectionId, label), onRemoveField(pageId, sectionId, fieldId),
 //   onAddPage(), onRemovePage(pageId),
-//   onAddPhoto(), onRemovePhoto(photoId),
+//   onAddPhoto(), onAddPhotoToPage(pageId), onRemovePhoto(photoId),
 // }
 export function renderForm(container, schema, formData, callbacks, options = {}) {
   container.innerHTML = "";
@@ -54,6 +54,20 @@ export function renderForm(container, schema, formData, callbacks, options = {})
       if (title && title.trim()) callbacks.onAddSection(page.id, title.trim());
     });
     pageWrap.appendChild(addSectionBtn);
+
+    // Issue 3: same "+ Add photo" affordance as the top photos block, but
+    // scoped to this page — the new photo is placed directly on THIS page
+    // instead of always defaulting to page 1 and needing the "Add to page"
+    // dropdown afterward. Same overall cap as the top block, since it's
+    // still the same shared pool of extra photos.
+    if (schema.photos.length < 4) {
+      const addPagePhotoBtn = document.createElement("button");
+      addPagePhotoBtn.type = "button";
+      addPagePhotoBtn.className = "btn btn-secondary btn-add-photo";
+      addPagePhotoBtn.textContent = "+ Add photo to this page";
+      addPagePhotoBtn.addEventListener("click", () => callbacks.onAddPhotoToPage(page.id));
+      pageWrap.appendChild(addPagePhotoBtn);
+    }
 
     container.appendChild(pageWrap);
   });

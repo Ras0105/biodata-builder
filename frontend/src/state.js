@@ -234,8 +234,10 @@ export function removePage(pageId) {
   notify();
 }
 
-export function addPhoto(label) {
-  const id = _addPhoto(state.schema, label);
+// Issue 3: pageId lets a photo be added directly onto a specific page (see
+// schemaUtils.addPhoto) — undefined keeps the old "lands on page 1" default.
+export function addPhoto(label, pageId) {
+  const id = _addPhoto(state.schema, label, pageId);
   if (id) state.formData[id] = null;
   saveDraft();
   notify();

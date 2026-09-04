@@ -24,6 +24,38 @@ async function captureElementAsJpegBlob(pageEl) {
     backgroundColor: "#ffffff",
     scale: Math.min(2, MAX_WIDTH_PX / pageEl.offsetWidth),
     useCORS: true,
+    // Some templates embed large inline (base64) background/frame images —
+    // give them more headroom to decode before html2canvas gives up.
+    imageTimeout: 30000,
+    // Issue: sharing failed outright (not just a console warning) whenever
+    // the page also had the header's autoplay hero-logo <video> elements in
+    // the DOM. html2canvas clones the WHOLE document (not just pageEl) to
+    // resolve layout/styles before rasterizing, and drawing an in-progress
+    // <video>'s current frame onto its internal canvas throws a
+    // SecurityError ("tainted") for those looping muted videos — unrelated
+    // to pageEl itself, but enough to abort the capture. Since we only ever
+    // need the template page as an image, skip cloning/rendering any
+    // <video> element entirely rather than trying to rasterize it.
+    ignoreElements: (el) => el.tagName === "VIDEO",
+    // Issue: template_06's arch-shaped photo frame uses a compound
+    // elliptical border-radius ("h1 h2 h3 h4 / v1 v2 v3 v4" — different
+    // horizontal/vertical radii per corner). html2canvas's CSS parser
+    // throws on that "/" shorthand, silently aborting the whole capture for
+    // just this one template with no useful error surfacing. Flatten any
+    // such border-radius to its horizontal-only equivalent on the CLONE
+    // html2canvas is about to rasterize — the live, on-screen, editable
+    // preview (and the real print/PDF pipeline) are completely untouched;
+    // only the shared JPEG trades a slightly less elliptical corner for
+    // actually being generated at all.
+    onclone: (clonedDoc, clonedEl) => {
+      const view = clonedDoc.defaultView || window;
+      clonedEl.querySelectorAll("*").forEach((node) => {
+        const radius = view.getComputedStyle(node).borderRadius;
+        if (radius && radius.includes("/")) {
+          node.style.borderRadius = radius.split("/")[0].trim();
+        }
+      });
+    },
   });
   return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY));
 }
@@ -37,10 +69,15 @@ export async function shareCurrentPreview(previewMount, templateName, overlay) {
   try {
     blob = await captureElementAsJpegBlob(pageEl);
   } catch (err) {
+    // Issue: this failure was previously completely silent (no console
+    // output at all), which made it impossible to diagnose why a specific
+    // template's capture failed. Always surface the real error now.
+    console.error("shareCurrentPreview: html2canvas capture failed:", err);
     overlay.fail("Couldn't generate a shareable image. Please try again.");
     return;
   }
   if (!blob) {
+    console.error("shareCurrentPreview: canvas.toBlob returned null — canvas may be empty or exceed the browser's max canvas size.");
     overlay.fail("Couldn't generate a shareable image. Please try again.");
     return;
   }
