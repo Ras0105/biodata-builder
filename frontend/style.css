@@ -677,7 +677,10 @@ body {
 /* ---- Builder ---- */
 .builder-layout {
   display: grid;
-  grid-template-columns: 460px minmax(0, 1fr);
+  /* Form column: fixed 460px on smaller side-by-side widths, but grows on
+     wider desktops/laptops (up to 620px) since there's extra room there —
+     preview column still gets whatever remains via minmax(0, 1fr). */
+  grid-template-columns: clamp(460px, 34vw, 620px) minmax(0, 1fr);
   gap: 36px;
   align-items: start;
 }
@@ -1834,4 +1837,3 @@ button.app-nav-link { padding: 0; }
   .browse-scroll-label { font-size: 12px; }
   .browse-scroll-arrow svg { width: 13px; height: 13px; }
 }
-
