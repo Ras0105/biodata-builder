@@ -166,6 +166,16 @@ export async function startCheckout({ email, fullName, phone, community, templat
       currency: CURRENCY,
     });
   } catch (err) {
+    // Network-level failure (request never reached our server — DNS, no
+    // connectivity, VPN/firewall block, etc.): this is almost always the
+    // customer's device/network, so tell them that plainly with steps they
+    // can actually act on, instead of a generic "try again" that leaves them
+    // thinking OUR server is broken.
+    if (err && err.isNetworkError) {
+      return overlay.failWithNetworkHelp();
+    }
+    // Server-level failure (request reached us, backend responded with an
+    // error): genuinely our side — keep this generic, don't blame their WiFi.
     return overlay.fail("Could not start checkout. Please try again in a moment.");
   }
 
@@ -202,4 +212,4 @@ export async function startCheckout({ email, fullName, phone, community, templat
     overlay.failWithHelp("Payment failed or was cancelled. You can try again whenever you're ready. If this keeps happening, let us know:");
   });
   rzp.open();
-}
+}

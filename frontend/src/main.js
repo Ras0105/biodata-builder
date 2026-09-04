@@ -246,11 +246,27 @@ const overlay = {
   // end with nowhere to go next. This keeps the overlay open with the
   // message plus a direct link to the "Report an Issue" form, so there's
   // always a next step instead of just "OK" and back to a confusing screen.
-  failWithHelp: (msg) => {
+  // `steps` is optional: an array of short troubleshooting bullets, shown
+  // under `msg`. Existing callers that pass only `msg` are unaffected — used
+  // for client-side (DNS/network/firewall) failures where we can actually
+  // point the customer at something they can try; see `failWithNetworkHelp`
+  // below, which is the one place that passes it.
+  failWithHelp: (msg, steps) => {
     overlayTextEl.textContent = "";
     const msgEl = document.createElement("div");
     msgEl.textContent = msg;
     overlayTextEl.appendChild(msgEl);
+
+    if (Array.isArray(steps) && steps.length) {
+      const list = document.createElement("ul");
+      list.className = "overlay-troubleshoot-list";
+      for (const step of steps) {
+        const item = document.createElement("li");
+        item.textContent = step;
+        list.appendChild(item);
+      }
+      overlayTextEl.appendChild(list);
+    }
 
     const link = document.createElement("button");
     link.type = "button";
@@ -263,6 +279,26 @@ const overlay = {
     overlayTextEl.appendChild(link);
 
     overlayEl.hidden = false;
+  },
+  // Specifically for network-level failures (see api.js's isNetworkError
+  // tagging): the request never reached our server, which in practice means
+  // it's almost always something on the customer's own device/network — a
+  // dropped connection, restrictive WiFi/ISP DNS, a VPN, or an
+  // antivirus/firewall blocking the domain. We say so plainly instead of a
+  // generic "something went wrong", since there's real, actionable advice to
+  // give here and it stops customers assuming their payment/order is broken
+  // on our end when it never left their browser.
+  failWithNetworkHelp: () => {
+    overlay.failWithHelp(
+      "We couldn't reach our server. This usually isn't a problem with your order — it's almost always something on your device or network blocking the connection.",
+      [
+        "Check that you're connected to the internet",
+        "Try switching networks — e.g. mobile data instead of WiFi (or vice versa)",
+        "If you're on office/school/public WiFi, it may be blocking this connection",
+        "Try turning off any VPN, ad-blocker, or antivirus temporarily",
+        "Then reload the page and try again",
+      ]
+    );
   },
 };
 // Let the user tap/click the overlay to dismiss it right away, instead of
@@ -628,4 +664,4 @@ browseScrollBtn?.addEventListener("click", () => {
 // auto-scroll immediately, so it never fights their own scrolling.
 ["wheel", "touchstart", "keydown"].forEach((evt) => {
   window.addEventListener(evt, cancelSlowScroll, { passive: true });
-});
+});

@@ -114,16 +114,17 @@ export const TEMPLATE_REGISTRY = [
     loadLayout: () => import("./catalog/template_26/layout.js"),
     styleHref: "./src/templates/catalog/template_26/style.css",
   },
-  {
-    id: "template_27",
-    name: "Golden Ganesh Invocation II",
-    community: "Hindu",
-    description: "A second golden-parchment Ganesh biodata with the same Om Ganeshaya Namah invocation, swastik corners and kalash motif as template_25, on a fresh photographic parchment background; extra pages carry a matching plain-bordered parchment without the invocation header.",
-    thumbnail: "./src/assets/thumbnails/template_27.png",
-    loadSchema: () => import("./catalog/template_27/schema.js"),
-    loadLayout: () => import("./catalog/template_27/layout.js"),
-    styleHref: "./src/templates/catalog/template_27/style.css",
-  },
+{
+  id: "template_27",
+  name: "Cream Kalash Swastik Marriage Biodata",
+  community: "Hindu",
+  description:
+    "A graceful Hindu marriage biodata designed on a soft cream parchment background with rich red and antique-gold ornamental detailing. The design features a traditional Swastik and auspicious Hindu motif at the top, delicate hanging accents, an elegant framed photo section, and clearly structured Personal Details, Family Details, and Contact Details. The lower portion is adorned with a festive Kalash surrounded by diyas, flowers, and traditional decorative elements, while intricate red-gold floral borders frame the entire page. Additional pages continue the same cream parchment theme with matching ornamental borders.",
+  thumbnail: "./src/assets/thumbnails/template_27.png",
+  loadSchema: () => import("./catalog/template_27/schema.js"),
+  loadLayout: () => import("./catalog/template_27/layout.js"),
+  styleHref: "./src/templates/catalog/template_27/style.css",
+},
   {
     id: "template_28",
     name: "Royal Amethyst Ganesh Invocation",

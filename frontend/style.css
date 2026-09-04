@@ -966,6 +966,25 @@ body {
 }
 .overlay[hidden] { display: none; }
 
+/* Long-form overlay content (network-error troubleshooting via
+   overlay.failWithHelp/failWithNetworkHelp in main.js) needs a readable
+   width and left-aligned text — the default .overlay flex-centering is fine
+   for a short one-line status message, but a paragraph + bullet list
+   centered edge-to-edge on a wide screen is hard to read. */
+#overlayText {
+  max-width: 420px;
+  text-align: center;
+}
+.overlay-troubleshoot-list {
+  text-align: left;
+  margin: 14px 0 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.85);
+}
+.overlay-troubleshoot-list li { margin-bottom: 6px; }
+
 .overlay-download-link {
   display: inline-block;
   margin-top: 16px;
@@ -1847,4 +1866,4 @@ button.app-nav-link { padding: 0; }
   .browse-scroll-btn { margin-right: 20px; padding: 7px 14px; }
   .browse-scroll-label { font-size: 12px; }
   .browse-scroll-arrow svg { width: 13px; height: 13px; }
-}
+}
