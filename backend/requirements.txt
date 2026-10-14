@@ -21,6 +21,7 @@ playwright==1.49.1
 
 # ---- Payments ----
 razorpay==1.4.2
+setuptools<81                 # razorpay 1.4.2 imports pkg_resources, which newer setuptools/Python envs (e.g. Vercel) don't include
 
 # ---- Object storage (Supabase Storage / Cloudflare R2, both S3-compatible) ----
 boto3==1.35.90
