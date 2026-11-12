@@ -1,0 +1,516 @@
+/* ---- Builder ---- */
+.builder-layout {
+  display: grid;
+  /* Form column: fixed 460px on smaller side-by-side widths, but grows on
+     wider desktops/laptops (up to 620px) since there's extra room there —
+     preview column still gets whatever remains via minmax(0, 1fr). */
+  grid-template-columns: clamp(460px, 34vw, 620px) minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+.form-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 24px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  color: var(--text);
+}
+.form-section {
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  padding: 16px 18px 18px;
+  margin: 0 0 18px;
+  min-width: 0; /* <fieldset> ignores flex/grid shrinking by default in
+    every major browser and instead sizes to its content's min-content —
+    without this override it was the one still forcing the page ~70px
+    wider than the screen even after the grid-track fix above. */
+}
+.form-section legend { font-weight: 700; font-size: 14.5px; margin-bottom: 12px; padding: 0 2px; color: var(--text); }
+.form-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.form-fields-grid .form-field-full { grid-column: 1 / -1; }
+.form-field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
+.form-field label { font-size: 13px; color: var(--text-muted); }
+.form-field input,
+.form-field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: #8a5a2b;
+  box-shadow: 0 0 0 3px rgba(138, 90, 43, 0.12);
+}
+.form-field textarea { resize: vertical; min-height: 80px; }
+.form-field input[type="file"] {
+  padding: 8px 10px;
+  cursor: pointer;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+.form-field input[type="file"]::file-selector-button,
+.form-field input[type="file"] {
+  padding: 8px 4px;
+  cursor: pointer;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: none;
+}
+.form-field input[type="file"]::file-selector-button:hover,
+.form-field input[type="file"]::-webkit-file-upload-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0; /* lets this shrink below its content's intrinsic width in the grid/flex parent */
+  overflow: hidden; /* clips the fixed-width template's pre-transform box (see body rule above) */
+}
+.preview-scale { transform-origin: top center; max-width: 100%; }
+
+/* ---- "View full screen" trigger above the preview (mobile) ---- */
+.preview-fullscreen-btn {
+  display: none; /* only shown on mobile — desktop uses the icon button in the top action bar instead, see .preview-fullscreen-btn-desktop */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: stretch;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.preview-fullscreen-btn:hover { border-color: var(--gold); }
+/* Visually hidden on mobile (icon-only fixed button, see media query below)
+   but still readable by screen readers / available as the button's tooltip
+   via title/aria-label. */
+.preview-fullscreen-btn-label {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- "View full screen" trigger in the top action bar (desktop) ---- */
+.preview-fullscreen-btn-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- Full-screen preview modal: takes over the whole viewport so the
+   template can be seen without the sticky top-actions bar / form getting
+   in the way, with its own close button. ---- */
+.preview-fullscreen[hidden] { display: none; }
+.preview-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.preview-fullscreen-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--header-bg);
+  color: var(--header-text);
+  flex-shrink: 0;
+}
+.preview-fullscreen-title { font-weight: 700; font-size: 15px; }
+.preview-fullscreen-close {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.preview-fullscreen-close:hover { background: rgba(255,255,255,0.14); border-color: var(--gold); }
+.preview-fullscreen-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+/* Inside fullscreen, the moved .preview-scale should fill the available
+   width so applyResponsiveScale() (livePreview.js) scales the page up
+   rather than staying pinned to the narrow in-page panel size. The wrapper
+   below clips the fixed-width template's pre-transform box, same reasoning
+   as .preview-panel above. */
+.preview-fullscreen-body .preview-scale { width: 100%; max-width: 735px; }
+
+/* ---- field hint (e.g. age validation) ---- */
+.field-hint { font-size: 12px; margin-top: 2px; min-height: 14px; }
+.field-hint.ok { color: #3b7a3b; }
+.field-hint.warn { color: #b23b3b; font-weight: 600; }
+
+/* ---- phone / country code group ---- */
+.phone-group { display: flex; gap: 8px; }
+.phone-group select { flex: 0 0 118px; padding: 10px 6px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; background: var(--bg-elevated); color: var(--text); }
+.phone-group input { flex: 1; min-width: 0; }
+.field-error { font-size: 12px; color: #b23b3b; margin-top: 4px; min-height: 14px; }
+
+/* ---- Canva-style page navigation (arrows + dots) ---- */
+.preview-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.preview-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+.preview-arrow:hover:not(:disabled) { background: var(--surface-muted); }
+.preview-arrow:disabled { opacity: 0.35; cursor: default; }
+
+.preview-dots { display: flex; align-items: center; gap: 8px; }
+.preview-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  padding: 0;
+}
+.preview-dot.active { background: var(--cta-bg); width: 22px; border-radius: 5px; }
+
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-primary { width: 100%; margin-top: 10px; }
+
+.top-actions {
+  position: sticky;
+  top: 66px;
+  z-index: 40;
+  display: flex;
+  flex-wrap: nowrap; /* the button row itself never wraps to a 2nd line — see .top-actions-footer for the consent/error text, which lives outside this row now */
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -32px 0;
+  padding: 12px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-soft);
+  box-shadow: 0 6px 16px -12px var(--shadow-color);
+  overflow-x: auto; /* safety net: if a viewport is too narrow to fit every icon, the
+    row scrolls horizontally instead of wrapping to a second line */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.top-actions-left, .top-actions-right { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; flex-shrink: 0; }
+.top-actions-right { justify-content: flex-end; margin-left: auto; }
+.builder-help-btn { font-size: 13px; padding: 8px 14px; opacity: 0.85; text-decoration: none; display: inline-flex; }
+.builder-help-btn:hover { opacity: 1; }
+
+/* Consent text + any download-block error now live in their own full-width
+   row below the button bar (.top-actions-footer), so they can never force
+   the icon row above to wrap onto a second line. */
+.top-actions-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 6px -32px 20px;
+  padding: 0 32px;
+}
+.download-block-reason { margin-top: 0; text-align: right; max-width: 320px; }
+.checkout-consent { font-size: 12px; line-height: 1.5; color: var(--muted, #64748b); text-align: right; max-width: 320px; }
+.checkout-consent a { color: inherit; text-decoration: underline; }
+.checkout-consent a:hover { color: var(--gold); }
+
+/* Icon + label buttons in the builder's top action bar. On desktop both
+   show; below the icon-toolbar breakpoint the label is visually hidden
+   (kept for screen readers) and the native `title` attribute gives a
+   hover/long-press tooltip, so each button collapses to a compact circle. */
+.top-actions .btn, .top-actions-left .btn, .top-actions-right .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.top-actions .btn-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
+.top-actions .btn-label { white-space: nowrap; }
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px;
+}
+.overlay[hidden] { display: none; }
+
+/* Long-form overlay content (network-error troubleshooting via
+   overlay.failWithHelp/failWithNetworkHelp in main.js) needs a readable
+   width and left-aligned text — the default .overlay flex-centering is fine
+   for a short one-line status message, but a paragraph + bullet list
+   centered edge-to-edge on a wide screen is hard to read. */
+#overlayText {
+  max-width: 420px;
+  text-align: center;
+}
+.overlay-troubleshoot-list {
+  text-align: left;
+  margin: 14px 0 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.85);
+}
+.overlay-troubleshoot-list li { margin-bottom: 6px; }
+
+.overlay-download-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: var(--gold, #8a5a2b);
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  border: none; /* also used on a <button> now (main.js failWithHelp), which has a default browser border otherwise */
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+/* ---- Responsive builder layout ----
+   Bumped from 960px to 1200px: the form column is a fixed 460px, so right
+   above the old 960px cutoff (e.g. ~961-1150px) the preview column was only
+   getting ~400-500px of a 900+px-wide document, which made the live preview
+   look cramped/broken. Stacking (form on top, preview below, full width)
+   kicks in earlier now so the preview always has enough room to render
+   cleanly, same as the mobile layout. */
+@media (max-width: 1200px) {
+  .container { padding: 16px; }
+
+  .builder-layout {
+    grid-template-columns: minmax(0, 1fr); /* stack form above preview; minmax(0,_) lets the
+      column actually shrink to the viewport instead of growing to fit its
+      widest un-shrinkable content (the default grid-item min-width:auto
+      behavior), which is what was pushing the whole page ~90px wider than
+      the screen and leaving that blank strip on the right. */
+    gap: 20px;
+  }
+
+  .form-panel {
+    position: static;
+    max-height: none; /* no forced inner scroll on mobile */
+    overflow-y: visible;
+    padding: 16px;
+  }
+
+  .form-fields-grid { grid-template-columns: 1fr; }
+
+  .preview-panel {
+    order: 2; /* form first, preview below on mobile */
+  }
+
+  /* Issue: on mobile the live preview sits BELOW the whole form (order: 2
+     above), so the old full-width "View full screen" button living right
+     above the preview was only reachable after scrolling past the entire
+     form. Pin a small icon-only version fixed to the viewport instead, so
+     it's reachable at any scroll position while viewing/filling the form.
+     It sits just below the sticky header (--header-h, measured in main.js)
+     rather than at top:0, so it never overlaps the header's own
+     theme-toggle/hamburger icons up there. It naturally disappears outside
+     the builder (this button lives inside #view-builder, which gets
+     display:none via the `hidden` attribute in the gallery view — see
+     showView() in main.js) and is covered by the fullscreen modal itself
+     once open (that modal is position:fixed/inset:0 with a higher z-index
+     and an opaque background, see .preview-fullscreen below). */
+  .preview-fullscreen-btn {
+    display: flex;
+    position: fixed;
+    top: calc(var(--header-h, 64px) + 10px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    z-index: 150;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-self: auto;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    opacity: 1;
+    transition: opacity 0.15s ease;
+  }
+  /* Toggled by an IntersectionObserver in main.js: while the top-actions
+     bar (Back/Start over/Need help/Share/Pay & Download) is still in view
+     at the top of the page, this fixed button would sit right on top of
+     it (covering Pay & Download) — so hide it until that bar has scrolled
+     out of view. */
+  .preview-fullscreen-btn.is-over-actions-bar {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .preview-fullscreen-btn-desktop { display: none; }
+
+  .preview-scale {
+    transform: none; /* let JS-driven width scaling take over, see main.js */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .contact-row {
+    grid-template-columns: 1fr; /* stack full name / email */
+  }
+
+  /* Compact icon toolbar: Back / Start over / Need help / Share collapse to
+     small round icon buttons (label hidden, tooltip on long-press/hover) so
+     the whole row takes one short line instead of stacking to several full-
+     width rows. Pay & Download stays a full, clearly-labelled button since
+     it's the primary action. */
+  /* Sticky top-actions is a desktop convenience (keeps Pay & Download
+     reachable in a tall two-column layout). On mobile the layout stacks
+     into one column, so a sticky bar here just floats over the Contact
+     fields / template preview as they scroll underneath it (fields get
+     hidden behind it). Let it scroll away normally instead. */
+  .top-actions {
+    position: static;
+    margin: 0 -16px 0;
+    padding: 8px 16px;
+    flex-direction: row;
+    flex-wrap: nowrap; /* one line, always — see overflow-x on the base rule for the rare
+      screen too narrow to fit every icon */
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .top-actions-left { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
+  .top-actions-right { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; margin-left: auto; }
+
+  .top-actions-left .btn,
+  .top-actions-right .preview-fullscreen-btn-desktop,
+  .top-actions-right #shareBtn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .top-actions-left .btn-label,
+  .top-actions-right .preview-fullscreen-btn-desktop .btn-label,
+  .top-actions-right #shareBtn .btn-label {
+    /* visually hidden, still readable by screen readers / still has a
+       native tooltip via the button's title attribute */
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .top-actions-left .btn-icon { font-size: 16px; }
+
+  #downloadBtn { flex: 0 0 auto; padding: 10px 16px; font-size: 13px; }
+
+  /* Consent text + any download-block error: full width, left-aligned,
+     small and unobtrusive, sitting on their own row below the icon bar. */
+  .top-actions-footer {
+    align-items: flex-start;
+    margin: 6px -16px 16px;
+    padding: 0 16px;
+  }
+  .download-block-reason, .checkout-consent { text-align: left; max-width: none; }
+  .checkout-consent { font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+  /* Smallest phones: icon row can get tight with 4 icons + Pay & Download —
+     drop Pay & Download's padding a touch further rather than wrapping. */
+  #downloadBtn { padding: 9px 12px; font-size: 12.5px; }
+}
+
+/* ---- Collapsible navbar: below this width the nav links, theme toggle
+   and "Browse Templates" button move into the hamburger dropdown so the
+   header never gets cramped or overflows on any phone width. ---- */
+@media (max-width: 860px) {
+  .app-nav { display: none; }
+  .app-header-actions > .btn-header-cta { display: none; }
+  .nav-toggle { display: inline-flex; }
+  /* Base header padding (32px each side) was tuned for desktop's wide nav
+     links; once those collapse into the hamburger, that much side padding
+     just reads as dead space between the logo and the icon cluster on
+     mid-width phones/tablets. Tighten it so the header actually uses the
+     screen width. */
+  .app-header { padding: 12px 20px; }
+
+  .mobile-menu:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--header-bg);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 20px 20px;
+    box-shadow: 0 18px 30px rgba(0,0,0,0.28);
+    max-height: calc(100vh - 100%);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header { padding: 12px 16px; top: 0; gap: 10px; }
+  .app-header .brand { font-size: 15px; gap: 8px; }
+  .app-header .brand-mark { width: 32px; height: 32px; }
+  .app-header .brand-sub { font-size: 9.5px; }
+  .form-field input, .form-field textarea { font-size: 16px; } /* prevents iOS auto-zoom on focus */
+}
+
+

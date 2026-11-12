@@ -1,0 +1,21 @@
+# Build context is the repo root (see backend/Dockerfile). The image only needs
+# backend/ plus frontend/package.json and frontend/src/templates.
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+**/.venv
+**/venv
+**/.env
+node_modules
+frontend/assets
+frontend/css
+frontend/legal
+frontend/index.html
+frontend/src/core
+frontend/src/modals
+frontend/src/components
+frontend/src/main.js
+docs
+tools
+_removed_review

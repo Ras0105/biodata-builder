@@ -6,7 +6,7 @@
 // editing when the catalog changes.
 
 import { TEMPLATE_REGISTRY, getCategories, listCategories } from "../templates/registry.js";
-import { openPreferenceForm } from "../preference-form.js";
+import { openPreferenceForm } from "../modals/preference-form.js";
 
 let activeCategory = "All";
 

@@ -1,0 +1,269 @@
+/* --- dynamic pages/sections/photos (added for flexible builder) --- */
+
+.form-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-field-photo {
+  position: relative;
+}
+
+.form-page {
+  border-top: 1px dashed #d8d2c8;
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.form-page:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.form-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #6b5f4f;
+  margin-bottom: 8px;
+}
+
+.section-title-input {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  padding: 2px 4px;
+  width: auto;
+  min-width: 140px;
+}
+
+.section-title-input:hover,
+.section-title-input:focus {
+  background: #f4efe6;
+  border-radius: 4px;
+  outline: none;
+}
+
+.form-section legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #6b5f4f;
+}
+
+.btn-danger {
+  color: #b23b3b;
+}
+
+.btn-add-section,
+.btn-add-page,
+.btn-add-photo {
+  display: inline-block;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+.btn-add-field {
+  display: block;
+  margin: 6px 0 4px;
+}
+
+.btn-remove-field {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+/* --- generic renderer for user-added extras (custom sections, extra photos, extra pages) --- */
+/* NOTE: the extras themselves (headings, rows, photos) are styled inline by
+   dynamicExtras.js using each template's own theme (see templates/themes.js)
+   so they visually match that specific template — not overridden here. */
+
+.photo-placement-label {
+  font-size: 11px;
+  color: #8a8070;
+  margin-top: 2px;
+}
+.photo-placement-select {
+  padding: 5px 8px;
+  border: 1px solid #d5d2ca;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+/* --- draggable/resizable extra photos on the live preview --- */
+.bd-user-photo { touch-action: none; }
+.bd-user-photo:hover { outline: 2px dashed rgba(0, 0, 0, 0.35); outline-offset: 2px; }
+.bd-user-photo-resize {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #1f1c1a;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+/* --- Canva-style on-photo edit button + panel (shape/border/filter/order/remove) --- */
+.bd-photo-edit-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1f1c1a;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  touch-action: none;
+}
+.bd-photo-edit-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 200px;
+  background: #fff;
+  border: 1px solid #d5d2ca;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  z-index: 1002;
+  cursor: default;
+  font-size: 12px;
+  touch-action: auto;
+}
+.bd-photo-edit-panel[hidden] { display: none; }
+.bd-photo-edit-panel .bd-panel-title { font-weight: 700; font-size: 12px; margin-bottom: 8px; color: #2a2620; }
+.bd-photo-edit-panel label { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; color: #6b5f4f; font-size: 11px; }
+.bd-photo-edit-panel select { font-family: inherit; font-size: 12px; padding: 4px; border: 1px solid #d5d2ca; border-radius: 4px; }
+.bd-photo-edit-panel input[type="range"] { width: 100%; }
+.bd-photo-edit-panel input[type="color"] { padding: 0; height: 24px; border: 1px solid #d5d2ca; border-radius: 4px; background: none; width: 100%; }
+.bd-photo-edit-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; border-top: 1px solid #eee; padding-top: 8px; }
+.bd-photo-edit-actions button {
+  text-align: left; background: none; border: none; padding: 0;
+  font-size: 12px; cursor: pointer; color: #6b5f4f; text-decoration: underline;
+}
+.bd-photo-edit-actions button.btn-danger { color: #b23b3b; }
+
+@media print {
+  .bd-user-photo:hover { outline: none; }
+  .bd-user-photo-resize { display: none; }
+  .bd-photo-edit-btn, .bd-photo-edit-panel { display: none !important; }
+}
+
+.bd-render-error {
+  padding: 24px;
+  background: #fff5f0;
+  border: 1px solid #e8c9b8;
+  color: #8a4a2b;
+  font-size: 14px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+
+@media print {
+  .bd-cont-page {
+    page-break-before: always;
+  }
+}
+
+/* --- Start over button --- */
+.btn-danger-outline {
+  border-color: #b3402a;
+  color: #b3402a;
+}
+.btn-danger-outline:hover { background: #fff5f0; }
+
+/* --- never silently lose long text off the edge of a page --- */
+.bd-template,
+.bd-cont-page {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.bd-template *,
+.bd-cont-page * {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* --- catalog-wide layout/overflow polish, applied on top of every template's
+   own skin. Every template's row/section/card wrapper follows the pattern
+   bdNN-row / bdNN-section / bdNN-card / bdNN-block / bdNN-group / bdNN-line,
+   so these attribute selectors reach all 24 templates without needing a
+   per-file override, while never touching builder-UI classes (scoped to
+   .bd-template). Individual templates may still refine further in their
+   own style.css. --- */
+.bd-template { box-sizing: border-box; }
+.bd-template *,
+.bd-template *::before,
+.bd-template *::after { box-sizing: border-box; }
+
+.bd-template [class*="-row"],
+.bd-template [class*="-section"],
+.bd-template [class*="-card"],
+.bd-template [class*="-block"],
+.bd-template [class*="-group"],
+.bd-template [class*="-line"],
+.bd-template [class*="-timeline-item"] {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Guard against a fixed-width label column swallowing a very long custom
+   field label: allow it to wrap onto a second line instead of shoving the
+   colon/value column out of alignment or off the page. */
+.bd-template [class*="-label"],
+.bd-template [class*="-value"] {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* Any element still using inline/table display for key-value pairs falls
+   back to a predictable two-column grid so long values wrap cleanly under
+   the label column instead of overflowing the sheet. */
+.bd-template [class*="-row"] {
+  min-width: 0;
+}
+.bd-template [class*="-row"] > * { min-width: 0; }
+
+/* Screen-only elevation so every template reads as a premium physical sheet
+   sitting on the page, rather than a flat rectangle — never printed/exported. */
+@media screen {
+  .bd-template {
+    box-shadow: 0 12px 32px rgba(20, 16, 10, 0.14), 0 2px 8px rgba(20, 16, 10, 0.08);
+  }
+}
+@media print {
+  .bd-template { box-shadow: none !important; }
+}
+

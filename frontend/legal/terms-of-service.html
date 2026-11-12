@@ -9,7 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../style.css" />
+<link rel="stylesheet" href="../css/01-base.css" />
+<link rel="stylesheet" href="../css/02-hero.css" />
+<link rel="stylesheet" href="../css/03-landing.css" />
+<link rel="stylesheet" href="../css/04-builder.css" />
+<link rel="stylesheet" href="../css/05-preview-extras.css" />
+<link rel="stylesheet" href="../css/06-footer.css" />
+<link rel="stylesheet" href="../css/07-pages-widgets.css" />
 <script>
   (function () {
     try {
@@ -23,7 +29,7 @@
 <body>
   <header class="app-header">
     <div class="brand">
-      <img class="brand-mark" src="../src/assets/aananda-logo-mark.png" alt="Aananda Digital" />
+      <img class="brand-mark" src="../assets/brand/aananda-logo-mark.png" alt="Aananda Digital" />
       <span class="brand-text">Aananda Digital<span class="brand-sub">Biodata Builder</span></span>
     </div>
     <div class="app-header-actions">
@@ -136,7 +142,7 @@
       <div class="app-footer-grid">
         <div class="app-footer-col app-footer-brand-col">
           <div class="app-footer-brand">
-            <img src="../src/assets/aananda-logo-mark.png" alt="Aananda Digital" class="app-footer-mark" />
+            <img src="../assets/brand/aananda-logo-mark.png" alt="Aananda Digital" class="app-footer-mark" />
             <div>
               <div class="app-footer-name">Aananda Digital</div>
               <div class="app-footer-tag">A venture of Aananda Creations</div>
@@ -194,8 +200,8 @@
   </footer>
 
   <script type="module">
-    import { initThemeToggle, initBackToTop, initFooterYear } from "../src/theme.js";
-    import { initReportIssueModal } from "../src/report-issue.js";
+    import { initThemeToggle, initBackToTop, initFooterYear } from "../src/core/theme.js";
+    import { initReportIssueModal } from "../src/modals/report-issue.js";
     initThemeToggle();
     initBackToTop();
     initFooterYear();

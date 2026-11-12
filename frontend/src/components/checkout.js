@@ -4,7 +4,7 @@
 // reconciliation fallback in the backend — see routers/orders.py) confirms
 // payment server-side.
 
-import { createOrder, pollOrderStatus } from "../api.js";
+import { createOrder, pollOrderStatus } from "../core/api.js";
 
 // NOTE: this value is cosmetic only — the backend ignores whatever amount
 // the client sends and decides the real price itself from

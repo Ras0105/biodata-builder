@@ -3,7 +3,7 @@
 // Turns { templateId, formData, schema } into the final print-ready HTML
 // for that biodata, by importing the FRONTEND's own template modules
 // directly — not a ported/duplicated copy. This is the one thing that
-// keeps 24 templates (and counting) from needing to be hand-rewritten in a
+// keeps 29 templates (and counting) from needing to be hand-rewritten in a
 // second templating language and kept in sync forever:
 //
 //   frontend/src/templates/catalog/<templateId>/{layout.js,schema.js,style.css}
@@ -21,6 +21,16 @@
 // Called by app/services/pdf_generator.py as a subprocess: JSON in via
 // stdin, full HTML document out via stdout, errors + a non-zero exit code
 // on failure.
+//
+// IMAGES (changed in the frontend restructure): template background images
+// used to be base64 blobs embedded in style.css / themes.js / layout.js.
+// They are now real files next to the template that owns them
+// (background.*, continuation-bg.*, frame.*). The browser loads those by
+// URL, but Playwright prints this HTML via page.set_content() with no base
+// URL, so any file path would fail to load and the PDF would silently come
+// out without its background. inlineLocalImages() below therefore converts
+// every reference back into a data: URI before the HTML leaves this script —
+// the PDF is byte-for-byte the same document it was before the restructure.
 //
 // The ONE deliberate behavioral difference from the live preview: extra
 // photos' edit affordances (pencil icon, resize handle) are visual-editor
@@ -47,6 +57,55 @@ const PAGE_HEIGHT = 1040; // must match PAGE_MIN_HEIGHT in dynamicExtras.js
 const HIDE_EDITOR_CHROME_CSS = `
   .bd-photo-edit-btn, .bd-user-photo-resize, .bd-photo-edit-panel { display: none !important; }
 `;
+
+const IMAGE_MIME = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+};
+
+class MissingImageError extends Error {}
+
+function fileToDataUri(absPath) {
+  const mime = IMAGE_MIME[path.extname(absPath).toLowerCase()];
+  if (!mime) throw new MissingImageError(`Unsupported image type: ${absPath}`);
+  let bytes;
+  try {
+    bytes = readFileSync(absPath);
+  } catch {
+    // Fail loudly: shipping a paid PDF with a missing background is worse
+    // than failing the render (the pipeline marks the order FAILED and logs it).
+    throw new MissingImageError(`Template image not found: ${absPath}`);
+  }
+  return `data:${mime};base64,${bytes.toString("base64")}`;
+}
+
+/**
+ * Relative url(...) references inside a template's style.css
+ * (e.g. `url('./background.png')`) -> data: URIs, resolved against the
+ * template's own folder. Absolute URLs, data: URIs and #fragments are left alone.
+ */
+function inlineCssUrls(css, baseDir) {
+  return css.replace(
+    /url\(\s*(['"]?)(?!data:|https?:|file:|\/|#)([^'")]+?)\1\s*\)/gi,
+    (_m, quote, rel) => `url(${quote}${fileToDataUri(path.resolve(baseDir, rel))}${quote})`
+  );
+}
+
+/**
+ * file:// URLs produced by `new URL("./x.png", import.meta.url).href` inside
+ * layout.js / themes.js (under Node, import.meta.url is a file:// URL) ->
+ * data: URIs. Runs over the finished HTML so it covers every page.
+ */
+function inlineFileUrls(html) {
+  return html.replace(
+    /file:\/\/[^\s"'()<>]+?\.(?:png|jpe?g|webp|gif|svg)/gi,
+    (url) => fileToDataUri(fileURLToPath(url))
+  );
+}
 
 async function readStdin() {
   const chunks = [];
@@ -128,15 +187,16 @@ async function main() {
   let styleCss;
   try {
     styleCss = readFileSync(path.join(catalogDir, "style.css"), "utf-8");
+    styleCss = inlineCssUrls(styleCss, catalogDir);
   } catch (err) {
-    return fail(`Could not read style.css for "${templateId}": ${err.message}`);
+    return fail(`Could not read/prepare style.css for "${templateId}": ${err.message}`);
   }
 
   const pagesMarkup = pagesHtml
     .map((html, i) => `<section class="bd-print-page"${i > 0 ? ' style="page-break-before:always;"' : ""}>${html}</section>`)
     .join("\n");
 
-  const doc = `<!DOCTYPE html>
+  let doc = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
@@ -153,6 +213,12 @@ async function main() {
 ${pagesMarkup}
 </body>
 </html>`;
+
+  try {
+    doc = inlineFileUrls(doc);
+  } catch (err) {
+    return fail(`Could not inline template images for "${templateId}": ${err.message}`);
+  }
 
   process.stdout.write(doc);
 }

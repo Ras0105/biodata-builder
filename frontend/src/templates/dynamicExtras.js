@@ -72,7 +72,7 @@ function buildSectionsBlock(theme, sections, formData, { topBorder } = {}) {
 const WATERMARK_TEXT = "AANANDA DIGITAL";
 // Drop a real logo file at this path and it starts appearing automatically;
 // until then, onerror below hides the broken-image icon so nothing looks off.
-const WATERMARK_LOGO_SRC = "./src/assets/watermark-logo.png";
+const WATERMARK_LOGO_SRC = "./assets/brand/watermark-logo.png";
 
 function watermarkTilesHtml(rotateDeg) {
   const cols = 3;

@@ -5,15 +5,15 @@ import { renderPreview } from "./components/livePreview.js";
 import { startCheckout, resumePendingOrderIfAny } from "./components/checkout.js";
 import { shareCurrentPreview } from "./components/sharePreview.js";
 import { calculateAge, findDobFieldId } from "./templates/schemaUtils.js";
-import { initBackToTop } from "./theme.js";
-import { initReportIssueModal, openReportIssueConfirm } from "./report-issue.js";
-import { initPreferenceFormModal } from "./preference-form.js";
+import { initBackToTop } from "./core/theme.js";
+import { initReportIssueModal, openReportIssueConfirm } from "./modals/report-issue.js";
+import { initPreferenceFormModal } from "./modals/preference-form.js";
 import {
   state, setField, selectTemplate, backToGallery, subscribe, saveDraft, clearDraft,
   addSection, removeSection, renameSection, addFieldToSection, removeField,
   addPage, removePage, addPhoto, removePhoto, movePhoto, positionPhoto,
   setPhotoStyle, bringPhotoToFront, restartCurrentTemplate,
-} from "./state.js";
+} from "./core/state.js";
 
 // --- Theme toggle (light/dark), persisted to localStorage. Self-contained:
 // applied to <html data-theme="..."> which every CSS variable in style.css
