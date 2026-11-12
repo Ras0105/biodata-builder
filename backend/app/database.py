@@ -12,6 +12,11 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
+    # Supabase's pooler (PgBouncer) in transaction mode (port 6543) doesn't
+    # support psycopg3's automatic server-side prepared statements and fails
+    # with "prepared statement ... does not exist". Disabling them is harmless
+    # on a direct/session connection too.
+    connect_args={"prepare_threshold": None},
 )
 
 SessionLocal = sessionmaker(
