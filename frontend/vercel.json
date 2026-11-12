@@ -14,13 +14,19 @@
       ]
     },
     {
-      "source": "/(index.html|css/(.*)|src/(.*)\\.js)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-cache" }
-      ]
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
     },
     {
-      "source": "/(assets/(.*)|src/templates/catalog/(.*)\\.(png|jpg|jpeg|webp))",
+      "source": "/css/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/src/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/assets/:path*",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
       ]
